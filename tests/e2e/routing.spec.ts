@@ -3,19 +3,19 @@ import { test, expect } from "@playwright/test";
 test("navigation between routes works", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByRole("link", { name: "Timer" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Timer", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Stats" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Settings" })).toBeVisible();
 
   await page.getByRole("link", { name: "Stats" }).click();
   await expect(page).toHaveURL(/\/stats/);
-  await expect(page.getByRole("heading", { name: "Stats" })).toBeVisible();
+  await expect(page.getByText(/no solves yet/i)).toBeVisible();
 
   await page.getByRole("link", { name: "Settings" }).click();
   await expect(page).toHaveURL(/\/settings/);
   await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
 
-  await page.getByRole("link", { name: "Timer" }).click();
+  await page.getByRole("link", { name: "Timer", exact: true }).click();
   await expect(page).toHaveURL("/");
 });
 
@@ -60,7 +60,6 @@ test("stats page shows timer sessions from localStorage", async ({ page }) => {
           inspectionEnabled: false,
           inspectionDurationSec: 15,
           soundEnabled: false,
-          scrambleLengths: { "3x3": 20, "2x2": 11, Pyraminx: 8, "Square-1": 11 },
         },
       }),
     );
@@ -72,13 +71,12 @@ test("stats page shows timer sessions from localStorage", async ({ page }) => {
   await page.getByRole("link", { name: "Stats" }).click();
   await expect(page).toHaveURL(/\/stats/);
 
-  await expect(page.getByText("Session_310826_01")).toBeVisible();
-  await expect(page.getByText("3x3")).toBeVisible();
-  await expect(page.getByText("Solves")).toBeVisible();
-  await expect(page.getByText("Best")).toBeVisible();
+  await expect(page.getByText(/^1 session /)).toBeVisible();
+  await expect(page.locator("option", { hasText: "3x3 (2 solves)" })).toHaveCount(1);
+  await expect(page.getByText("Solves in range", { exact: true })).toBeVisible();
 });
 
 test("stats page shows empty state when no sessions", async ({ page }) => {
   await page.goto("/stats");
-  await expect(page.getByText(/no sessions/i)).toBeVisible();
+  await expect(page.getByText(/no solves yet/i)).toBeVisible();
 });

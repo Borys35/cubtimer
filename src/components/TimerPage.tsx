@@ -382,7 +382,7 @@ export default function TimerPage() {
         </button>
         <div
           suppressHydrationWarning
-          className="text-lg sm:text-[28px] md:text-[36px] font-medium opacity-70 text-center whitespace-pre-wrap leading-snug tracking-[0.08em] sm:tracking-[0.15em] flex-1 min-w-0 break-words max-h-[35vh] overflow-y-auto"
+          className="text-lg sm:text-[28px] md:text-[36px] font-medium opacity-70 text-center whitespace-pre-wrap leading-snug tracking-[0.08em] sm:tracking-[0.15em] flex-1 min-w-0 break-words max-h-[35vh] overflow-y-auto overflow-x-hidden"
         >
           {scramble}
         </div>

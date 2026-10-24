@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SMOKE_TARGET: prod
-      SMOKE_URL: ${{ vars.PROD_URL || 'https://cstimer-analyzer.vercel.app/' }}
+      SMOKE_URL: ${{ vars.PROD_URL || 'https://timer.boryskaczmarek.pl/' }}
       SMOKE_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4

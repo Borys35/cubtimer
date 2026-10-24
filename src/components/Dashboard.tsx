@@ -237,7 +237,8 @@ export default function Dashboard() {
   const [series, setSeries] = useState<Record<SeriesKey, boolean>>(DEFAULT_SERIES);
 
   const data: ParseResult | null = useMemo(() => {
-    if (sessions.length === 0) return null;
+    // The timer always keeps one (possibly empty) session, so "nothing to show" means no solves.
+    if (!sessions.some((s) => s.solves.length > 0)) return null;
     return convertTimerSessionsToParseResult(sessions);
   }, [sessions]);
 
@@ -281,7 +282,7 @@ export default function Dashboard() {
           CubTimer
         </h1>
         <p className="max-w-sm text-center text-sm text-[var(--text-dim)]">
-          No sessions yet. Start solving in the Timer tab to see your stats here.
+          No solves yet. Start solving in the Timer tab, or import a csTimer export in Settings, to see your stats here.
         </p>
       </main>
     );

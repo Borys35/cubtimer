@@ -25,8 +25,11 @@ test("dashboard renders after fixture upload", async ({ page }) => {
     await page.goto("/");
   }
 
-  await expect(page.getByText(/Drop your cstimer .txt export here/i)).toBeVisible();
+  // Import lives in Settings; the stats page reads whatever sessions are stored.
+  await page.getByRole("link", { name: "Settings" }).click();
   await page.setInputFiles('input[type="file"]', FIXTURE);
+  await expect(page.getByText(/^Imported \d+ session/)).toBeVisible();
+  await page.getByRole("link", { name: "Stats" }).click();
 
   await expect(page.locator(".tier-pill").first()).toBeVisible({ timeout: 20_000 });
   const scoreText = await page.locator("svg text").first().textContent();

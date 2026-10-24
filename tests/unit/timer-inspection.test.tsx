@@ -3,6 +3,14 @@ import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useTimer } from "@/lib/use-timer";
 
+// Real generation cold-loads cubing.js, which can outlast waitFor's timeout on
+// CI. Instant, distinct scrambles keep the hook's async flow but make it fast.
+vi.mock("@/lib/scramble", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/scramble")>();
+  let n = 0;
+  return { ...actual, generateScramble: vi.fn(async () => `R U R' U' #${++n}`) };
+});
+
 function createOpts(overrides: Record<string, unknown> = {}) {
   return {
     puzzleType: "3x3" as const,
