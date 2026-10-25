@@ -301,7 +301,9 @@ async function getCubingScrambler(): Promise<ScrambleFunction | null> {
   try {
     const isNode = typeof process !== "undefined" && Boolean(process.versions?.node);
     if (isNode) {
-      const mod = await import("cubing/scramble");
+      // Node-only (tests, scripts). webpackIgnore keeps webpack from bundling a
+      // second, unused copy of cubing.js into the browser chunks and precache.
+      const mod = await import(/* webpackIgnore: true */ "cubing/scramble");
       return mod.randomScrambleForEvent as ScrambleFunction;
     }
 
