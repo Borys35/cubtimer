@@ -1,4 +1,6 @@
-# CubeTimer — Domain Glossary
+# CubTimer — Domain Glossary
+
+**CubTimer** is the canonical product name (not "CubeTimer").
 
 ## Core concepts
 
@@ -35,3 +37,9 @@
 - **SolveDetailModal**: Shows time, date, scramble, +2/DNF/delete controls. +2 and DNF are mutually exclusive — toggling one clears the other.
 - **TimerPage**: Centered scramble display with prev/next arrows, timer (or typed-time input), phase label, and a top-right toolbar for input mode and zen mode. The next arrow generates a fresh scramble once the session's history is exhausted.
 - **Start pad**: on touch devices, the visible area of the timer screen where a hold arms the timer. Only holds that begin inside it start a solve; stopping a running solve is not limited to it. Not shown in typing mode or on keyboard/mouse devices.
+
+## Installed app
+
+- **Installed app**: CubTimer launched from the home screen (or as a desktop app) instead of a browser tab. Opens full-screen, in any orientation, and works offline, scrambles included. On iOS it keeps its own browser storage, separate from Safari's, so a signed-out user's solves from Safari are not there.
+- **Install button**: shown in the navbar only on a phone that has CubTimer open in a browser tab. Never shown inside the installed app.
+- **Fresh-install hint**: a one-time message in the installed app telling a signed-out user with no solves that browser data doesn't carry over, and how to get it back (sign in to sync, or import an export).
