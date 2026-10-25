@@ -8,6 +8,7 @@ import { playStartBeep, playStopBeep } from "@/lib/sound";
 import { useMenu } from "@/components/MenuContext";
 import { useTimerPhase } from "@/components/TimerPhaseContext";
 import { useWakeLock } from "@/lib/use-wake-lock";
+import { FreshInstallHint } from "@/components/FreshInstallHint";
 
 /** Touches starting on these never arm the timer — they're normal taps. */
 const NO_TIMER_SELECTOR = "button, a, input, select, textarea, [data-no-timer]";
@@ -60,6 +61,10 @@ export default function TimerPage() {
   useEffect(() => {
     publishPhase(phase);
   }, [phase, publishPhase]);
+
+  // The phase is shared app-wide (update toast); leaving the timer page
+  // means no solve is in progress.
+  useEffect(() => () => publishPhase("idle"), [publishPhase]);
 
   // Long scrambles mean long stretches without a touch; don't let the screen sleep.
   useWakeLock(settings.keepAwake);
@@ -318,8 +323,9 @@ export default function TimerPage() {
           aria-label="Toggle sessions"
           disabled={isActive}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          {/* Sessions list icon (bullets), so it doesn't read as the navbar's ☰ Nav menu. */}
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" />
           </svg>
         </button>
       )}
@@ -397,6 +403,8 @@ export default function TimerPage() {
           </svg>
         </button>
       </div>
+
+      <FreshInstallHint suppressed={isActive} />
 
       {typing ? (
         <form onSubmit={onTypedSubmit} className="flex flex-col items-center w-full max-w-md">

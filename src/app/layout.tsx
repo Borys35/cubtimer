@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { STORAGE_KEY, THEMES } from "@/lib/theme";
@@ -7,10 +7,31 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { MenuProvider } from "@/components/MenuContext";
 import { Navbar } from "@/components/Navbar";
+import { TimerPhaseProvider } from "@/components/TimerPhaseContext";
+import { UpdateToast } from "@/components/UpdateToast";
 
 export const metadata: Metadata = {
   title: "CubTimer",
   description: "Strict progress analysis for cstimer exports",
+  appleWebApp: {
+    capable: true,
+    title: "CubTimer",
+    statusBarStyle: "black-translucent",
+  },
+  // Next only emits mobile-web-app-capable; older iOS needs the apple- name.
+  other: { "apple-mobile-web-app-capable": "yes" },
+};
+
+// viewport-fit=cover lets the installed iOS app draw under the notch and
+// home indicator; the navbar and content pad themselves with safe-area insets.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F5F3EF" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B0E11" },
+  ],
 };
 
 const noFlashScript = `(function(){try{var t=localStorage.getItem("${STORAGE_KEY}");if(${JSON.stringify(
@@ -33,10 +54,13 @@ export default function RootLayout({
           <ThemeProvider>
             <AuthProvider>
               <SessionProvider>
-                <Navbar />
-                <div className="flex-1 overflow-auto">
-                  {children}
-                </div>
+                <TimerPhaseProvider>
+                  <Navbar />
+                  <div className="safe-area-content flex-1 overflow-auto">
+                    {children}
+                  </div>
+                  <UpdateToast />
+                </TimerPhaseProvider>
               </SessionProvider>
             </AuthProvider>
           </ThemeProvider>

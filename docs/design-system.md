@@ -248,14 +248,14 @@ Full-height centered layout. Elements stacked vertically:
    - running with blind mode: shows "Solving..." instead of time
 3. **Phase label**: `text-xl opacity-40` — "Hold here to start" on coarse pointers, "Press spacebar to start" otherwise
 4. **Info line**: `text-base opacity-30` (puzzle type · session name)
-5. **Hamburger button**: `absolute top-3 left-3`, mobile only, disabled during solve, hidden in zen mode
+5. **Sessions button**: `absolute top-3 left-3`, mobile only, disabled during solve, hidden in zen mode. Bulleted-list icon, so it doesn't look like the navbar's ☰ Nav menu
 6. **Toolbar**: `absolute top-3 right-3` — input-mode toggle (timer ↔ typing) and zen toggle; fades out (`opacity-0 pointer-events-none`) while armed/running/inspecting
 
 **Typing mode** (`settings.inputMode === "typing"`) replaces the timer display + phase label with a large `font-mono` text input (`text-6xl sm:text-8xl`, bottom border turns `--amber` on focus, `--red` on parse error). Enter (or the mobile-only Save button) records the time against the current scramble. While typing, digits are masked live by `formatTypedInput` (decimal point and minute colon placed automatically: `1234` shows as `12.34`, `10245` as `1:02.45`); a trailing `+` marks +2 and text with letters (`DNF`) is left raw.
 
-**Zen mode** (`settings.zenMode`) unmounts the session sidebar and hides the hamburger.
+**Zen mode** (`settings.zenMode`) unmounts the session sidebar and hides the sessions button.
 
-**Start pad** (`.start-pad`, coarse pointer + timer mode only): the layout switches from centered to top-aligned (`pt-14 pb-4`, clearing the hamburger/toolbar). Below the scramble row a `flex-1` rounded box (`border-radius: 1rem`, 2px border) holds the timer display, phase label and info line. Look is driven by `data-state`:
+**Start pad** (`.start-pad`, coarse pointer + timer mode only): the layout switches from centered to top-aligned (`pt-14 pb-4`, clearing the sessions button/toolbar). Below the scramble row a `flex-1` rounded box (`border-radius: 1rem`, 2px border) holds the timer display, phase label and info line. Look is driven by `data-state`:
 
 - `idle` (also during inspection): dashed `--border`, `--surface` at 70%, tap-target icon above the time
 - `holding` (armed, hold < threshold): solid `--red` border, `--red` 12% fill
@@ -264,6 +264,8 @@ Full-height centered layout. Elements stacked vertically:
 
 Border/fill transition 0.15s, disabled under reduced motion. Not rendered in typing mode or on fine pointers.
 
+**Fresh-install hint** (`FreshInstallHint.tsx`): a `.card` banner (`w-full max-w-4xl mb-4 px-4 py-3 text-sm`) between the scramble row and the timer/start pad. Body text `--text-dim`; actions "Sign in" (only when sync is configured) and "Import" are `--amber` text buttons; an `×` dismiss button sits top right in `--text-faint`. Shown only in the iOS installed app to a signed-out user with no solves, once (`localStorage` key `cstimer-analyzer:fresh-install-hint-dismissed`). It is `data-no-timer` and outside the start pad, so tapping it never arms; while armed/running/inspecting it fades out (`opacity-0 pointer-events-none`) keeping its space so the timer doesn't jump.
+
 **Keep screen awake** (`settings.keepAwake`, default on): `useWakeLock` holds a Screen Wake Lock while the timer page is mounted, re-requesting it when the tab becomes visible again. Silently skipped where the API is missing or the request is denied.
 
 **Touch surface** (`.timer-pad`): native non-passive touch listeners. Touches starting on buttons, inputs or `[data-no-timer]` (scramble row, toolbar) never arm. When the start pad is rendered, only touches that begin inside it arm. Multi-touch and drift beyond 12px cancel an arm. While running, any touch stops. CSS sets `touch-action: manipulation`, no callout, no tap highlight.
@@ -271,7 +273,7 @@ Border/fill transition 0.15s, disabled under reduced motion. Not rendered in typ
 ### Session sidebar
 
 Desktop: fixed `w-64` panel on the left, `bg-[var(--surface)]`, `border-r border-[var(--border)]`.
-Mobile: slide-in overlay from left (`fixed inset-y-0 left-0`), toggled by hamburger.
+Mobile: slide-in overlay from left (`fixed inset-y-0 left-0`), toggled by the sessions button.
 
 Structure (top to bottom):
 
@@ -285,7 +287,11 @@ Auto-collapse: sidebar width → 0 during armed/running phases and in zen mode (
 ### Navbar
 
 Fixed top bar: `bg-[var(--surface)] border-b border-[var(--border)] shrink-0`.
-Left: "CubeTimer" brand link (class `logo-hover`). Right: Timer/Stats/Settings links + ThemeToggle.
+Left: "CubTimer" brand link (class `logo-hover`). Right, `md` and up: Timer/Stats/Settings links + ThemeToggle + AccountMenu.
+
+Below `md`: logo | Install button | AccountMenu | ☰ **Nav menu** button (`h-8 w-8`, icon turns into ✕ while open). The Nav menu is a full-width dropdown under the navbar (`absolute top-full`, `--surface`, bottom border, `shadow-2xl`, `z-50`) listing Timer/Stats/Settings (`py-2.5` rows, `--surface-3` hover) and, under a divider, the ThemeToggle. It closes on link tap, outside tap and Escape. Its state lives in `Navbar.tsx`, not in `MenuContext` (that is the session sidebar).
+
+**Install button** (`InstallButton.tsx`, logic in `src/lib/use-install.ts`): `.card` pill like Sign in, `--amber` text with a download icon. Rendered only on a phone (`(pointer: coarse)` and narrower than 768px, checked after mount) in a browser tab (not `display-mode: standalone`, not `navigator.standalone`), and only where install works: a captured `beforeinstallprompt` (tap shows the native prompt; hidden after `appinstalled`) or iOS (tap opens a bottom sheet: "Tap [share icon] Share, then Add to Home Screen", closed by Got it / backdrop / Escape). Never dismissable.
 
 Brand logo (`Navbar.tsx`):
 
@@ -295,6 +301,17 @@ Brand logo (`Navbar.tsx`):
 Logo hover eyes: two `.logo-eye-overlay` spans sit over the cube's eyes inside the link. Mobile placement `left-[45%]` / `left-[65%]`, `top-[29%]`, `w-[9%] h-[39%]`; desktop `md:left-[12%]` / `md:left-[17%]`, `md:top-[34%]`, `md:w-[2.3%] md:h-[29%]`. Rounded dark squares, `pointer-events: none`, `opacity` transition 0.2s. `.logo-hover:hover .logo-eye-overlay { opacity: 0 }` hides the eyes on hover.
 
 Favicon: `src/app/icon.svg` is `public/logo.svg` (the cube mark) with a square `viewBox="0 -6 68 68"` so it centers in browser tabs; Next.js links it automatically. `src/app/apple-icon.tsx` renders the same SVG at 132px on a 180×180 `#0B0E11` tile as the PNG iOS home-screen icon (iOS doesn't accept SVG there). Change the logo in both `public/logo.svg` and `src/app/icon.svg`.
+
+PWA icons: `src/app/icons/[file]/route.tsx` renders `icon-192.png`, `icon-512.png` (logo at 132/180 of the tile, like the apple icon) and `icon-512-maskable.png` (logo at 56%, so its whole box sits inside the 80% maskable safe circle) at build time. Apple and PWA icons share `renderAppIcon` in `src/lib/appIcon.tsx`. The manifest (`src/app/manifest.ts`) uses `#0B0E11` for `background_color` and `theme_color`; the `theme-color` meta is `#0B0E11` for dark and `#F5F3EF` (light `--bg`) for light `prefers-color-scheme`.
+
+### Safe areas
+
+The installed iOS app uses `viewport-fit=cover` and a `black-translucent` status bar, so the page draws under the notch and home indicator. Classes in `globals.css` pad with `env(safe-area-inset-*)` (0 on desktop and in normal browser tabs):
+
+- `.safe-area-nav` (Navbar): top inset added to `py-2`; left/right `max(1rem, inset)`
+- `.safe-area-content` (layout content area): left/right/bottom insets, so the start pad and page bottoms clear the home indicator and landscape notch
+- `.safe-area-sidebar` (mobile slide-in sidebar): top/bottom/left insets, `--surface` fill
+- `.safe-area-toast` (Toast): bottom/right offsets include the insets
 
 ---
 
@@ -310,7 +327,7 @@ Layout (all pages):
 Timer page (/):
   Flex row: Sidebar (w-64, collapses to 0 during solve) + TimerPage (flex-1)
   TimerPage: centered column — scramble, timer display, phase label, info
-  Mobile: hamburger in timer container, sidebar slides in from left
+  Mobile: sessions button in timer container, sidebar slides in from left
 
 Stats page (/stats):
   Dashboard component (full width, no sidebar)
@@ -461,15 +478,18 @@ The `.score-hero` layout is the only component using custom CSS for responsive b
 | `src/lib/use-timer.ts`                 | Timer phase machine, scramble generation, keyboard/touch handlers  |
 | `src/lib/use-wake-lock.ts`             | Screen Wake Lock while the timer page is open                      |
 | `src/lib/types.ts`                     | TimerSettings, TimerSession, TimerSolve types                      |
-| `src/components/TimerPage.tsx`         | Timer display, scramble, blind mode, hamburger button              |
+| `src/components/TimerPage.tsx`         | Timer display, scramble, blind mode, sessions button                |
 | `src/components/TimerPhaseContext.tsx` | Shares timer phase between TimerPage and page layout               |
 | `src/components/SessionSidebar.tsx`    | Dropdown picker, stats bar, solve list, session management         |
-| `src/components/Navbar.tsx`            | Top navigation bar, page links, theme toggle                       |
+| `src/components/Navbar.tsx`            | Top navigation bar, page links, theme toggle, phone Nav menu      |
+| `src/components/InstallButton.tsx`     | Phone Install button and iOS Add to Home Screen sheet              |
+| `src/lib/use-install.ts`               | Install button decision: phone, standalone, beforeinstallprompt, iOS |
 | `src/components/MenuContext.tsx`       | Mobile sidebar open/close state                                    |
 | `src/components/ThemeProvider.tsx`     | Theme context, cycle function, localStorage persistence            |
 | `src/components/ScoreboardHero.tsx`    | Gauge ring SVG, score display, sub-score bars                      |
 | `src/components/Dashboard.tsx`         | Upload screen, filter bar, chart, prescriptions, sessions          |
 | `src/components/StatsPage.tsx`         | Per-session stat cards, session solve table, import/export         |
 | `src/components/Toast.tsx`             | Toast notification with optional undo action                       |
+| `src/components/UpdateToast.tsx`       | "New version available" toast with Reload; only while timer idle   |
 | `src/lib/stats.ts`                     | Statistics — median, rollingAverage, madCv, iqrCv, bucketing, trend/projection, analyze |
 | `src/lib/chartData.ts`                 | Chart row aggregation — per-session mean/std/CV, rolling averages, trend, projection, volume |

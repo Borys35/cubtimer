@@ -234,15 +234,35 @@ export function useTimer({
     };
   }, []);
 
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+  const initialPlaceholderRef = useRef(scrambleHistory[0]);
+
   const prevPuzzleRef = useRef(puzzleType);
   useEffect(() => {
+    // The first scramble renders synchronously from the random-move generator
+    // so the page is never blank. Swap it for a cubing.js random-state scramble
+    // as soon as one is ready, unless the user has already moved on from it.
+    const upgradePlaceholder = (placeholder: string) => {
+      generateScramble(puzzleType)
+        .then((scramble) => {
+          if (phaseRef.current !== "idle") return;
+          setScrambleHistory((prev) =>
+            prev.length === 1 && prev[0] === placeholder ? [scramble] : prev,
+          );
+        })
+        .catch(() => {});
+    };
+
     if (prevPuzzleRef.current !== puzzleType) {
       prevPuzzleRef.current = puzzleType;
       const initial = generateFallbackScramble(puzzleType);
       setScrambleHistory([initial]);
       setScrambleIndex(0);
+      upgradePlaceholder(initial);
       nextScramblePromiseRef.current = generateScramble(puzzleType);
     } else if (!nextScramblePromiseRef.current) {
+      upgradePlaceholder(initialPlaceholderRef.current);
       nextScramblePromiseRef.current = generateScramble(puzzleType);
     }
   }, [puzzleType]);
