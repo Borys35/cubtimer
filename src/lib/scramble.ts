@@ -262,6 +262,39 @@ export function generateFallbackScramble(puzzle: PuzzleType): string {
 
 type ScrambleFunction = (event: string) => Promise<{ toString(): string }>;
 
+/**
+ * Same-origin copy of cubing.js, produced by `scripts/copy-cubing.mjs` (see
+ * docs/adr/0001-self-host-cubing-js.md). cubing.js resolves its search worker
+ * via `new URL("./search-worker-entry.js", import.meta.url)`, so the worker
+ * and its chunks load from `/cubing/chunks/` on the same origin too.
+ */
+export const CUBING_SCRAMBLE_URL = "/cubing/scramble/index.js";
+
+/**
+ * Loading the module is same-origin and small, but on a slow mobile network the
+ * first fetch of the scramble chunks can take a few seconds.
+ */
+const MODULE_LOAD_TIMEOUT_MS = 10_000;
+
+/**
+ * The first scramble also spawns the search worker and builds its tables.
+ * 4x4 random-state search is the slowest event (multi-second on phones);
+ * the rest finish well under a second once warm. Scrambles are prefetched
+ * while the user solves, so a generous ceiling rarely shows as latency.
+ */
+const GENERATION_TIMEOUT_MS = 8_000;
+const SLOW_EVENT_TIMEOUT_MS: Partial<Record<string, number>> = { "444": 20_000 };
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new Error(message)), ms);
+    }),
+  ]).finally(() => clearTimeout(timer));
+}
+
 let cubingModulePromise: Promise<ScrambleFunction | null> | null = null;
 
 async function getCubingScrambler(): Promise<ScrambleFunction | null> {
@@ -273,16 +306,15 @@ async function getCubingScrambler(): Promise<ScrambleFunction | null> {
     }
 
     if (!cubingModulePromise) {
-      const dynamicImport = new Function("u", "return import(u)");
-      cubingModulePromise = Promise.race([
-        dynamicImport("https://cdn.cubing.net/v0/js/cubing/scramble"),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("cubing.js load timeout")), 3000)
-        ),
-      ])
-        .then((mod: any) => mod.randomScrambleForEvent as ScrambleFunction)
+      // Runtime import of a static public file; hidden from the bundler.
+      const dynamicImport = new Function("u", "return import(u)") as (u: string) => Promise<any>;
+      const url = new URL(CUBING_SCRAMBLE_URL, window.location.origin).href;
+      cubingModulePromise = withTimeout(dynamicImport(url), MODULE_LOAD_TIMEOUT_MS, "cubing.js load timeout")
+        .then((mod) => mod.randomScrambleForEvent as ScrambleFunction)
         .catch((err) => {
-          console.warn("Unable to load cubing.js from CDN:", err);
+          console.warn("Unable to load self-hosted cubing.js:", err);
+          // Allow a later scramble to retry instead of caching the failure.
+          cubingModulePromise = null;
           return null;
         });
     }
@@ -300,18 +332,17 @@ export async function generateScramble(puzzle: PuzzleType): Promise<string> {
   try {
     const scrambler = await getCubingScrambler();
     if (scrambler) {
-      const scramblePromise = scrambler(eventCode);
-      const scramble = await Promise.race([
-        scramblePromise,
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("Scramble generation timeout")), 3000)
-        ),
-      ]);
+      const scramble = await withTimeout(
+        scrambler(eventCode),
+        SLOW_EVENT_TIMEOUT_MS[eventCode] ?? GENERATION_TIMEOUT_MS,
+        "Scramble generation timeout",
+      );
       return scramble.toString();
     }
   } catch (err) {
     console.warn(`Scramble generation failed for ${puzzle}, using fallback:`, err);
   }
 
+  // Last resort only: random-move, not WCA random-state.
   return generateFallbackScramble(puzzle);
 }

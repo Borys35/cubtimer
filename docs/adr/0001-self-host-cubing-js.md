@@ -4,5 +4,6 @@ The browser loads the cubing.js scrambler from the app's own `/cubing/` copy (bu
 
 ## Consequences
 
-- All of cubing.js (excluding `.map` files, about 2.5 MB) is precached when the app is installed, so every puzzle scrambles offline from the first launch.
+- cubing's npm `dist/lib` imports bare specifiers a browser can't resolve, so `scripts/copy-cubing.mjs` bundles the `cubing/scramble` entry with esbuild (code-split, minified, no source maps) into `public/cubing/`. The output is about 1.2 MB, most of it the inlined WASM search.
+- All of `public/cubing/` is precached when the app is installed, so every puzzle scrambles offline from the first launch.
 - The random-move generators in `src/lib/scramble.ts` remain only as a last resort if the self-hosted module fails to load.
