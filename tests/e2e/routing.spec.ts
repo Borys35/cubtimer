@@ -48,8 +48,9 @@ test("stats page shows timer sessions from localStorage", async ({ page }) => {
     },
   ];
 
-  await page.goto("/");
-  await page.evaluate((data) => {
+  // Seed before any app code runs. Writing after load races the app's own
+  // first save (default empty session), which can land later and overwrite it.
+  await page.addInitScript((data) => {
     localStorage.setItem(
       "cstimer-analyzer",
       JSON.stringify({
@@ -65,7 +66,7 @@ test("stats page shows timer sessions from localStorage", async ({ page }) => {
     );
   }, { sessions });
 
-  await page.reload();
+  await page.goto("/");
   await page.waitForFunction(() => Boolean(document.documentElement.dataset.theme));
 
   await page.getByRole("link", { name: "Stats" }).click();
