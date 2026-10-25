@@ -15,8 +15,8 @@ const STATUS: Record<SyncStatus, { label: string; color: string }> = {
 
 /** Navbar entry: "Sign in" when signed out, account menu when signed in. */
 export function AccountMenu() {
-  const { configured, ready, user, syncStatus, notice, clearNotice, signOut } = useAuth();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const { configured, ready, user, syncStatus, notice, clearNotice, signOut, signInOpen, setSignInOpen } =
+    useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +37,7 @@ export function AccountMenu() {
     return (
       <>
         <button
-          onClick={() => setDialogOpen(true)}
+          onClick={() => setSignInOpen(true)}
           className="card flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[var(--text-dim)] transition-colors hover:text-[var(--text)]"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -46,7 +46,7 @@ export function AccountMenu() {
           <span className="hidden sm:inline">Sign in</span>
           <span className="sr-only sm:hidden">Sign in</span>
         </button>
-        {dialogOpen && <SignInDialog onClose={() => setDialogOpen(false)} />}
+        {signInOpen && <SignInDialog onClose={() => setSignInOpen(false)} />}
         {toasts}
       </>
     );

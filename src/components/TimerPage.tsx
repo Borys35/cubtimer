@@ -8,6 +8,7 @@ import { playStartBeep, playStopBeep } from "@/lib/sound";
 import { useMenu } from "@/components/MenuContext";
 import { useTimerPhase } from "@/components/TimerPhaseContext";
 import { useWakeLock } from "@/lib/use-wake-lock";
+import { FreshInstallHint } from "@/components/FreshInstallHint";
 
 /** Touches starting on these never arm the timer — they're normal taps. */
 const NO_TIMER_SELECTOR = "button, a, input, select, textarea, [data-no-timer]";
@@ -397,6 +398,8 @@ export default function TimerPage() {
           </svg>
         </button>
       </div>
+
+      <FreshInstallHint suppressed={isActive} />
 
       {typing ? (
         <form onSubmit={onTypedSubmit} className="flex flex-col items-center w-full max-w-md">

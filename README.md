@@ -60,6 +60,7 @@ Upload a cstimer export (.txt) → get a progress chart, scoring breakdown, and 
 - **Signed out**: everything is saved in this browser only
 - **Local sessions on sign-in**: if this browser has sessions recorded while signed out, you're asked whether to add them to your account
 - **Set password** from the account menu at any time
+- **Installed app on iOS**: an app added to the home screen keeps its own storage, separate from Safari's, so solves you recorded signed out in Safari don't show up there. To bring them over, either sign in (in Safari and in the installed app) so they sync through your account, or export them from Safari (Settings → Export) and import the file in the installed app. The installed app shows a one-time hint about this when you open it signed out with no solves
 
 ### Themes
 

@@ -35,6 +35,9 @@ interface AuthCtx {
   setPassword: (password: string) => Promise<string | null>;
   /** Resolves to the number of changes that couldn't be synced first. */
   signOut: () => Promise<number>;
+  /** The navbar's sign-in dialog is open. Shared so other UI (e.g. the fresh-install hint) can open it. */
+  signInOpen: boolean;
+  setSignInOpen: (open: boolean) => void;
 }
 
 const AuthContext = createContext<AuthCtx>({
@@ -50,6 +53,8 @@ const AuthContext = createContext<AuthCtx>({
   signUp: async () => ({ error: "Sign-in is not configured.", needsConfirmation: false }),
   setPassword: async () => "Sign-in is not configured.",
   signOut: async () => 0,
+  signInOpen: false,
+  setSignInOpen: () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -57,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
+  const [signInOpen, setSignInOpen] = useState(false);
 
   useEffect(() => {
     if (!supabaseConfigured) return;
@@ -72,6 +78,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const userId = user?.id ?? null;
+
+  // Signing in closes the dialog; don't let it reappear after signing out.
+  useEffect(() => {
+    if (userId) setSignInOpen(false);
+  }, [userId]);
   const queue = useMemo(() => {
     const client = getSupabase();
     if (!client || !userId) return null;
@@ -193,8 +204,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signUp,
       setPassword,
       signOut,
+      signInOpen,
+      setSignInOpen,
     }),
-    [ready, user, queue, syncStatus, notice, clearNotice, sendMagicLink, signInWithPassword, signUp, setPassword, signOut],
+    [ready, user, queue, syncStatus, notice, clearNotice, sendMagicLink, signInWithPassword, signUp, setPassword, signOut, signInOpen],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

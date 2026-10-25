@@ -264,6 +264,8 @@ Full-height centered layout. Elements stacked vertically:
 
 Border/fill transition 0.15s, disabled under reduced motion. Not rendered in typing mode or on fine pointers.
 
+**Fresh-install hint** (`FreshInstallHint.tsx`): a `.card` banner (`w-full max-w-4xl mb-4 px-4 py-3 text-sm`) between the scramble row and the timer/start pad. Body text `--text-dim`; actions "Sign in" (only when sync is configured) and "Import" are `--amber` text buttons; an `×` dismiss button sits top right in `--text-faint`. Shown only in the iOS installed app to a signed-out user with no solves, once (`localStorage` key `cstimer-analyzer:fresh-install-hint-dismissed`). It is `data-no-timer` and outside the start pad, so tapping it never arms; while armed/running/inspecting it fades out (`opacity-0 pointer-events-none`) keeping its space so the timer doesn't jump.
+
 **Keep screen awake** (`settings.keepAwake`, default on): `useWakeLock` holds a Screen Wake Lock while the timer page is mounted, re-requesting it when the tab becomes visible again. Silently skipped where the API is missing or the request is denied.
 
 **Touch surface** (`.timer-pad`): native non-passive touch listeners. Touches starting on buttons, inputs or `[data-no-timer]` (scramble row, toolbar) never arm. When the start pad is rendered, only touches that begin inside it arm. Multi-touch and drift beyond 12px cancel an arm. While running, any touch stops. CSS sets `touch-action: manipulation`, no callout, no tap highlight.
