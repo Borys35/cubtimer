@@ -266,6 +266,8 @@ Border/fill transition 0.15s, disabled under reduced motion. Not rendered in typ
 
 **Fresh-install hint** (`FreshInstallHint.tsx`): a `.card` banner (`w-full max-w-4xl mb-4 px-4 py-3 text-sm`) between the scramble row and the timer/start pad. Body text `--text-dim`; actions "Sign in" (only when sync is configured) and "Import" are `--amber` text buttons; an `×` dismiss button sits top right in `--text-faint`. Shown only in the iOS installed app to a signed-out user with no solves, once (`localStorage` key `cstimer-analyzer:fresh-install-hint-dismissed`). It is `data-no-timer` and outside the start pad, so tapping it never arms; while armed/running/inspecting it fades out (`opacity-0 pointer-events-none`) keeping its space so the timer doesn't jump.
 
+**Last-solve actions** (`LastSolveActions.tsx`): after a solve finishes on this screen, a row of +2 / DNF toggles (`px-4 py-2 rounded text-sm font-medium`, `--surface-3` fill; active +2 is `--amber` text on `--amber` 20%, active DNF `--red` on `--red` 20%, `aria-pressed`) and a trash-icon "Delete last solve" button (`--text` at 50%, `--red` on hover). Deleting shows the "Solve deleted" toast with Undo. +2 and DNF are mutually exclusive. The timer display shows the result with penalties (`12.34+`, `DNF`; typing mode shows it as the input placeholder). Placed under the timer display on fine pointers, under the start pad on phones, and under the input in typing mode; it reserves its `h-11` row even when empty so nothing jumps. Hidden while armed/running/inspecting, before the first solve on this screen, and after switching session. The row is `data-no-timer` and outside the start pad, so taps never arm.
+
 **Keep screen awake** (`settings.keepAwake`, default on): `useWakeLock` holds a Screen Wake Lock while the timer page is mounted, re-requesting it when the tab becomes visible again. Silently skipped where the API is missing or the request is denied.
 
 **Touch surface** (`.timer-pad`): native non-passive touch listeners. Touches starting on buttons, inputs or `[data-no-timer]` (scramble row, toolbar) never arm. When the start pad is rendered, only touches that begin inside it arm. Multi-touch and drift beyond 12px cancel an arm. While running, any touch stops. CSS sets `touch-action: manipulation`, no callout, no tap highlight.
@@ -479,6 +481,7 @@ The `.score-hero` layout is the only component using custom CSS for responsive b
 | `src/lib/use-wake-lock.ts`             | Screen Wake Lock while the timer page is open                      |
 | `src/lib/types.ts`                     | TimerSettings, TimerSession, TimerSolve types                      |
 | `src/components/TimerPage.tsx`         | Timer display, scramble, blind mode, sessions button                |
+| `src/components/LastSolveActions.tsx`  | +2 / DNF / delete for the just-finished solve on the timer screen   |
 | `src/components/TimerPhaseContext.tsx` | Shares timer phase between TimerPage and page layout               |
 | `src/components/SessionSidebar.tsx`    | Dropdown picker, stats bar, solve list, session management         |
 | `src/components/Navbar.tsx`            | Top navigation bar, page links, theme toggle, phone Nav menu      |

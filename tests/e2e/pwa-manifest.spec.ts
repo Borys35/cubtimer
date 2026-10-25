@@ -61,3 +61,13 @@ test("iOS standalone and theme-color meta tags are set", async ({ page }) => {
     page.locator('meta[name="theme-color"][media="(prefers-color-scheme: light)"]'),
   ).toHaveAttribute("content", "#F5F3EF");
 });
+
+test("page title is descriptive while the home-screen label stays short", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveTitle("CubTimer – Speedcubing Timer & cstimer Progress Analyzer");
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /WCA scrambles/);
+  await expect(page.locator('meta[name="apple-mobile-web-app-title"]')).toHaveAttribute(
+    "content",
+    "CubTimer",
+  );
+});

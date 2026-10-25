@@ -11,8 +11,9 @@ import { TimerPhaseProvider } from "@/components/TimerPhaseContext";
 import { UpdateToast } from "@/components/UpdateToast";
 
 export const metadata: Metadata = {
-  title: "CubTimer",
-  description: "Strict progress analysis for cstimer exports",
+  title: "CubTimer – Speedcubing Timer & cstimer Progress Analyzer",
+  description:
+    "Speedcubing timer with WCA scrambles and inspection. Import your cstimer sessions to get a progress grade and coaching tips. Works offline as an installable app and syncs your solves to the cloud.",
   appleWebApp: {
     capable: true,
     title: "CubTimer",

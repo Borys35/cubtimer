@@ -2,13 +2,16 @@
 
 import { useEffect, useCallback, useRef, useState } from "react";
 import { useSession } from "@/components/SessionProvider";
+import type { TimerSolve } from "@/lib/types";
 import { useTimer } from "@/lib/use-timer";
-import { formatTimerTime, formatTypedInput, parseTypedTime } from "@/lib/timer-utils";
+import { formatSolveResult, formatTimerTime, formatTypedInput, parseTypedTime } from "@/lib/timer-utils";
 import { playStartBeep, playStopBeep } from "@/lib/sound";
 import { useMenu } from "@/components/MenuContext";
 import { useTimerPhase } from "@/components/TimerPhaseContext";
 import { useWakeLock } from "@/lib/use-wake-lock";
 import { FreshInstallHint } from "@/components/FreshInstallHint";
+import { LastSolveActions } from "@/components/LastSolveActions";
+import { Toast } from "@/components/Toast";
 
 /** Touches starting on these never arm the timer — they're normal taps. */
 const NO_TIMER_SELECTOR = "button, a, input, select, textarea, [data-no-timer]";
@@ -16,7 +19,15 @@ const NO_TIMER_SELECTOR = "button, a, input, select, textarea, [data-no-timer]";
 const TOUCH_SLOP_PX = 12;
 
 export default function TimerPage() {
-  const { activeSession, settings, updateSettings, addSolve } = useSession();
+  const {
+    activeSession,
+    settings,
+    updateSettings,
+    addSolve,
+    updateSolve,
+    deleteSolve,
+    restoreSolve,
+  } = useSession();
   const { mobileOpen, setMobileOpen } = useMenu();
   const { setPhase: publishPhase } = useTimerPhase();
 
@@ -24,14 +35,24 @@ export default function TimerPage() {
   const typing = settings.inputMode === "typing";
   const zen = settings.zenMode;
 
+  // Penalty buttons act on the solve finished on this screen, not on
+  // whatever happens to be last in the session when the page opens.
+  // Keyed by time + date so a solve deleted elsewhere (sidebar) isn't mistaken
+  // for the one before it.
+  const [justSolved, setJustSolved] = useState<Pick<TimerSolve, "timeMs" | "dateSec"> | null>(null);
+  const activeSessionId = activeSession?.id;
+  useEffect(() => setJustSolved(null), [activeSessionId]);
+
   const solve = useCallback(
     (data: { timeMs: number; scramble: string; dnf: boolean; penalty: number }) => {
+      const dateSec = Math.floor(Date.now() / 1000);
+      setJustSolved({ timeMs: data.timeMs, dateSec });
       addSolve({
         timeMs: data.timeMs,
         dnf: data.dnf,
         penalty: data.penalty,
         scramble: data.scramble,
-        dateSec: Math.floor(Date.now() / 1000),
+        dateSec,
       });
     },
     [addSolve],
@@ -248,13 +269,35 @@ export default function TimerPage() {
           ? "var(--amber)"
           : "var(--text)";
 
+  const newest = activeSession?.solves.at(-1);
+  const lastSolve =
+    justSolved && newest && newest.timeMs === justSolved.timeMs && newest.dateSec === justSolved.dateSec
+      ? newest
+      : null;
+  const showLastSolve = phase === "idle" && lastSolve !== null;
+
+  const [undoSolve, setUndoSolve] = useState<TimerSolve | null>(null);
+  const closeUndo = useCallback(() => setUndoSolve(null), []);
+  const deleteLastSolve = () => {
+    if (!activeSession || !lastSolve) return;
+    deleteSolve(activeSession.id, lastSolve.id);
+    setUndoSolve(lastSolve);
+  };
+  const restoreLastSolve = () => {
+    if (!activeSession || !undoSolve) return;
+    const { id: _id, ...rest } = undoSolve;
+    restoreSolve(activeSession.id, rest);
+  };
+
   const timerText = inspecting
     ? inspectionOver
       ? "+2"
       : String(Math.ceil(displayTime / 1000))
     : showBlind
       ? "Solving..."
-      : formatTimerTime(displayTime);
+      : showLastSolve
+        ? formatSolveResult(lastSolve)
+        : formatTimerTime(displayTime);
 
   const isActive = phase === "armed" || phase === "running" || phase === "inspection";
 
@@ -297,6 +340,19 @@ export default function TimerPage() {
       data-testid="timer-display"
     >
       {timerText}
+    </div>
+  );
+
+  // Space is reserved even when hidden, so the timer doesn't jump after a solve.
+  const lastSolveActions = (
+    <div className={`h-11 shrink-0 ${showStartPad ? "mt-3" : "mt-4"}`}>
+      {showLastSolve && (
+        <LastSolveActions
+          solve={lastSolve}
+          onUpdate={(patch) => activeSession && updateSolve(activeSession.id, lastSolve.id, patch)}
+          onDelete={deleteLastSolve}
+        />
+      )}
     </div>
   );
 
@@ -418,7 +474,7 @@ export default function TimerPage() {
             inputMode="decimal"
             autoComplete="off"
             spellCheck={false}
-            placeholder={formatTimerTime(displayTime)}
+            placeholder={showLastSolve ? formatSolveResult(lastSolve) : formatTimerTime(displayTime)}
             aria-label="Solve time"
             aria-invalid={typedError}
             className={`w-full text-center text-6xl sm:text-8xl font-mono font-bold tracking-tight bg-transparent border-b-2 outline-none py-2 placeholder:text-[var(--text-faint)] ${
@@ -437,6 +493,7 @@ export default function TimerPage() {
           >
             Save
           </button>
+          {lastSolveActions}
         </form>
       ) : showStartPad ? (
         <div
@@ -458,11 +515,23 @@ export default function TimerPage() {
       ) : (
         <>
           {timerDisplay}
+          {lastSolveActions}
           <div className="text-xl opacity-40 mt-4">{phaseLabel}</div>
         </>
       )}
 
+      {showStartPad && lastSolveActions}
+
       {!showStartPad && sessionInfo}
+
+      {undoSolve && (
+        <Toast
+          message="Solve deleted"
+          onClose={closeUndo}
+          action={{ label: "Undo", onClick: restoreLastSolve }}
+          testId="solve-deleted-toast"
+        />
+      )}
     </div>
   );
 }
