@@ -1,3 +1,5 @@
+import type { TimerSolve } from "@/lib/types";
+
 export type TimerPhase = "idle" | "armed" | "running" | "inspection";
 
 export function formatTimerTime(ms: number): string {
@@ -98,4 +100,22 @@ export function formatTypedInput(raw: string): string {
   const rest = padded.slice(0, -2);
   if (rest.length <= 2) return `${rest}.${cs}${suffix}`;
   return `${rest.slice(0, -2)}:${rest.slice(-2)}.${cs}${suffix}`;
+}
+
+export type PenaltyPatch = Pick<TimerSolve, "penalty" | "dnf">;
+
+/**
+ * Patch for toggling +2 or DNF on a solve. The two are mutually exclusive:
+ * turning one on clears the other; toggling an active one clears it.
+ */
+export function togglePenalty(solve: PenaltyPatch, kind: "plus2" | "dnf"): PenaltyPatch {
+  if (kind === "dnf") return { dnf: !solve.dnf, penalty: 0 };
+  return { penalty: solve.penalty > 0 ? 0 : 1, dnf: false };
+}
+
+/** Result as shown on the timer: "12.34", "14.34+" with +2, or "DNF". */
+export function formatSolveResult(solve: Pick<TimerSolve, "timeMs" | "penalty" | "dnf">): string {
+  if (solve.dnf) return "DNF";
+  if (solve.penalty > 0) return `${formatTimerTime(solve.timeMs + solve.penalty * 2000)}+`;
+  return formatTimerTime(solve.timeMs);
 }
