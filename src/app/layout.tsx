@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { STORAGE_KEY, THEMES } from "@/lib/theme";
@@ -11,6 +11,25 @@ import { Navbar } from "@/components/Navbar";
 export const metadata: Metadata = {
   title: "CubTimer",
   description: "Strict progress analysis for cstimer exports",
+  appleWebApp: {
+    capable: true,
+    title: "CubTimer",
+    statusBarStyle: "black-translucent",
+  },
+  // Next only emits mobile-web-app-capable; older iOS needs the apple- name.
+  other: { "apple-mobile-web-app-capable": "yes" },
+};
+
+// viewport-fit=cover lets the installed iOS app draw under the notch and
+// home indicator; the navbar and content pad themselves with safe-area insets.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F5F3EF" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B0E11" },
+  ],
 };
 
 const noFlashScript = `(function(){try{var t=localStorage.getItem("${STORAGE_KEY}");if(${JSON.stringify(
@@ -34,7 +53,7 @@ export default function RootLayout({
             <AuthProvider>
               <SessionProvider>
                 <Navbar />
-                <div className="flex-1 overflow-auto">
+                <div className="safe-area-content flex-1 overflow-auto">
                   {children}
                 </div>
               </SessionProvider>

@@ -285,7 +285,7 @@ Auto-collapse: sidebar width → 0 during armed/running phases and in zen mode (
 ### Navbar
 
 Fixed top bar: `bg-[var(--surface)] border-b border-[var(--border)] shrink-0`.
-Left: "CubeTimer" brand link (class `logo-hover`). Right: Timer/Stats/Settings links + ThemeToggle.
+Left: "CubTimer" brand link (class `logo-hover`). Right: Timer/Stats/Settings links + ThemeToggle.
 
 Brand logo (`Navbar.tsx`):
 
@@ -295,6 +295,17 @@ Brand logo (`Navbar.tsx`):
 Logo hover eyes: two `.logo-eye-overlay` spans sit over the cube's eyes inside the link. Mobile placement `left-[45%]` / `left-[65%]`, `top-[29%]`, `w-[9%] h-[39%]`; desktop `md:left-[12%]` / `md:left-[17%]`, `md:top-[34%]`, `md:w-[2.3%] md:h-[29%]`. Rounded dark squares, `pointer-events: none`, `opacity` transition 0.2s. `.logo-hover:hover .logo-eye-overlay { opacity: 0 }` hides the eyes on hover.
 
 Favicon: `src/app/icon.svg` is `public/logo.svg` (the cube mark) with a square `viewBox="0 -6 68 68"` so it centers in browser tabs; Next.js links it automatically. `src/app/apple-icon.tsx` renders the same SVG at 132px on a 180×180 `#0B0E11` tile as the PNG iOS home-screen icon (iOS doesn't accept SVG there). Change the logo in both `public/logo.svg` and `src/app/icon.svg`.
+
+PWA icons: `src/app/icons/[file]/route.tsx` renders `icon-192.png`, `icon-512.png` (logo at 132/180 of the tile, like the apple icon) and `icon-512-maskable.png` (logo at 56%, so its whole box sits inside the 80% maskable safe circle) at build time. Apple and PWA icons share `renderAppIcon` in `src/lib/appIcon.tsx`. The manifest (`src/app/manifest.ts`) uses `#0B0E11` for `background_color` and `theme_color`; the `theme-color` meta is `#0B0E11` for dark and `#F5F3EF` (light `--bg`) for light `prefers-color-scheme`.
+
+### Safe areas
+
+The installed iOS app uses `viewport-fit=cover` and a `black-translucent` status bar, so the page draws under the notch and home indicator. Classes in `globals.css` pad with `env(safe-area-inset-*)` (0 on desktop and in normal browser tabs):
+
+- `.safe-area-nav` (Navbar): top inset added to `py-2`; left/right `max(1rem, inset)`
+- `.safe-area-content` (layout content area): left/right/bottom insets, so the start pad and page bottoms clear the home indicator and landscape notch
+- `.safe-area-sidebar` (mobile slide-in sidebar): top/bottom/left insets, `--surface` fill
+- `.safe-area-toast` (Toast): bottom/right offsets include the insets
 
 ---
 

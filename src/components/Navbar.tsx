@@ -10,13 +10,13 @@ export function Navbar() {
   const { theme } = useTheme();
 
   return (
-    <nav className="flex items-center justify-between px-4 py-2 border-b border-[var(--border)] text-base bg-[var(--surface)] shrink-0">
+    <nav className="safe-area-nav flex items-center justify-between px-4 py-2 border-b border-[var(--border)] text-base bg-[var(--surface)] shrink-0">
       <div className="flex items-center gap-3">
         <Link href="/" className="logo-hover relative inline-block">
           {/* Icon only — mobile */}
           <Image
             src="/logo.svg"
-            alt="CubeTimer"
+            alt="CubTimer"
             width={34}
             height={28}
             className="md:hidden"
@@ -25,7 +25,7 @@ export function Navbar() {
           {/* Logo with text — desktop, theme-aware */}
           <Image
             src={theme === "light" ? "/logo-light.svg" : "/logo-dark.svg"}
-            alt="CubeTimer"
+            alt="CubTimer"
             width={130}
             height={28}
             className="hidden md:block h-[28px] w-auto"

@@ -638,7 +638,7 @@ export function SessionSidebar() {
 
       {/* Mobile slide-in */}
       <div
-        className={`fixed inset-y-0 left-0 z-30 transition-transform duration-200 md:hidden ${
+        className={`safe-area-sidebar fixed inset-y-0 left-0 z-30 transition-transform duration-200 md:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

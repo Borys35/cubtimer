@@ -308,6 +308,30 @@ body {
   opacity: 0;
 }
 
+/* Safe areas: the installed iOS app (viewport-fit=cover, black-translucent
+   status bar) draws under the notch and home indicator. env() is 0 elsewhere,
+   so desktop and normal browser tabs are unchanged. */
+.safe-area-nav {
+  padding-top: calc(0.5rem + env(safe-area-inset-top));
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+.safe-area-content {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.safe-area-sidebar {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  background: var(--surface);
+}
+.safe-area-toast {
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  right: calc(1rem + env(safe-area-inset-right));
+}
+
 /* Timer touch surface: no double-tap zoom, long-press callout or tap flash. */
 .timer-pad {
   touch-action: manipulation;
