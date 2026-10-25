@@ -2,7 +2,7 @@
 
 import TimerPage from "@/components/TimerPage";
 import { SessionSidebar } from "@/components/SessionSidebar";
-import { TimerPhaseProvider, useTimerPhase } from "@/components/TimerPhaseContext";
+import { useTimerPhase } from "@/components/TimerPhaseContext";
 import { useSession } from "@/components/SessionProvider";
 
 function TimerLayout() {
@@ -27,10 +27,8 @@ function TimerLayout() {
   );
 }
 
+// TimerPhaseProvider lives in the root layout so the update toast can see
+// the phase on every page.
 export default function Home() {
-  return (
-    <TimerPhaseProvider>
-      <TimerLayout />
-    </TimerPhaseProvider>
-  );
+  return <TimerLayout />;
 }

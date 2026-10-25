@@ -7,6 +7,8 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { MenuProvider } from "@/components/MenuContext";
 import { Navbar } from "@/components/Navbar";
+import { TimerPhaseProvider } from "@/components/TimerPhaseContext";
+import { UpdateToast } from "@/components/UpdateToast";
 
 export const metadata: Metadata = {
   title: "CubTimer",
@@ -52,10 +54,13 @@ export default function RootLayout({
           <ThemeProvider>
             <AuthProvider>
               <SessionProvider>
-                <Navbar />
-                <div className="safe-area-content flex-1 overflow-auto">
-                  {children}
-                </div>
+                <TimerPhaseProvider>
+                  <Navbar />
+                  <div className="safe-area-content flex-1 overflow-auto">
+                    {children}
+                  </div>
+                  <UpdateToast />
+                </TimerPhaseProvider>
               </SessionProvider>
             </AuthProvider>
           </ThemeProvider>

@@ -490,5 +490,6 @@ The `.score-hero` layout is the only component using custom CSS for responsive b
 | `src/components/Dashboard.tsx`         | Upload screen, filter bar, chart, prescriptions, sessions          |
 | `src/components/StatsPage.tsx`         | Per-session stat cards, session solve table, import/export         |
 | `src/components/Toast.tsx`             | Toast notification with optional undo action                       |
+| `src/components/UpdateToast.tsx`       | "New version available" toast with Reload; only while timer idle   |
 | `src/lib/stats.ts`                     | Statistics — median, rollingAverage, madCv, iqrCv, bucketing, trend/projection, analyze |
 | `src/lib/chartData.ts`                 | Chart row aggregation — per-session mean/std/CV, rolling averages, trend, projection, volume |

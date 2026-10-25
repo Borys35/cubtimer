@@ -62,6 +62,10 @@ export default function TimerPage() {
     publishPhase(phase);
   }, [phase, publishPhase]);
 
+  // The phase is shared app-wide (update toast); leaving the timer page
+  // means no solve is in progress.
+  useEffect(() => () => publishPhase("idle"), [publishPhase]);
+
   // Long scrambles mean long stretches without a touch; don't let the screen sleep.
   useWakeLock(settings.keepAwake);
 
