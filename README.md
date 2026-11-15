@@ -64,7 +64,7 @@ Upload a cstimer export (.txt) → get a progress chart, scoring breakdown, and 
 
 ### Themes
 
-Dark → Light → Borealis → Nebula → Ember. The last three are aurora themes: an animated aurora in the background, seen through a glassy navbar and session sidebar. Preference persisted in localStorage.
+Dark → Light → Borealis → Nebula → Ember → ASCII. Borealis, Nebula and Ember are aurora themes: an animated aurora in the background, seen through a glassy navbar and session sidebar. ASCII draws slowly turning cubes and self-typing algorithms in characters. Preference persisted in localStorage.
 
 ## How your data is processed
 

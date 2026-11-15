@@ -179,7 +179,7 @@ export default function SettingsPage() {
         <div className="bg-surface rounded-lg p-4 space-y-3">
           <SettingRow
             label="Theme"
-            description="Switch between dark, light, and the animated aurora themes"
+            description="Switch between dark, light, the animated aurora themes, and ASCII"
           >
             <button
               onClick={cycleTheme}

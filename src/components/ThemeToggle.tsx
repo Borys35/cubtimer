@@ -9,6 +9,7 @@ const ICONS: Record<Theme, string> = {
   borealis: "\u2726",
   nebula: "\u2726",
   ember: "\u2726",
+  ascii: "#",
 };
 
 export default function ThemeToggle() {

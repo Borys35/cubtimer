@@ -10,7 +10,7 @@ Warm precision. The UI should feel like a well-built instrument — not a generi
 
 ## Color system
 
-All colors are CSS custom properties defined in `src/app/globals.css`. There are five theme scopes: `[data-theme="dark"]`, `[data-theme="light"]`, and the aurora themes `[data-theme="borealis"]`, `[data-theme="nebula"]`, `[data-theme="ember"]`. Changing a hex value here changes it everywhere that token is used.
+All colors are CSS custom properties defined in `src/app/globals.css`. There are six theme scopes: `[data-theme="dark"]`, `[data-theme="light"]`, and the aurora themes `[data-theme="borealis"]`, `[data-theme="nebula"]`, `[data-theme="ember"]`, and `[data-theme="ascii"]`. Changing a hex value here changes it everywhere that token is used.
 
 ### Core palette (dark theme shown)
 
@@ -89,6 +89,14 @@ Used in prescription cards and sub-score bars via CSS classes:
 | `.axis-improvement` | `var(--cube-red)`  | `#ff6b62`      | Improvement metric |
 | `.axis-consistency` | `var(--cube-blue)` | `#5b9bff`      | Consistency metric |
 | `.axis-frequency`   | `var(--amber)`     | `var(--amber)` | Frequency metric   |
+
+### ASCII theme
+
+`ascii` is a dark theme over an animated ASCII backdrop (`AsciiBackground.tsx`, a 2D `<canvas class="ascii-canvas">` at `z-index: -1`, 15 fps):
+
+- **Cubes**: three 3x3 cubes turn and drift slowly near the corners, clear of the scramble and timer. Each character cell casts a ray at the cube; a hit is drawn in the sticker's color with a character from the ramp `:=+*#%@` by how much the face is lit. Gaps between stickers stay empty.
+- **Algorithms**: real algorithms (`R U R' U'`, PLLs, OLLs) type themselves out at random cells in JetBrains Mono, hold, then fade. They are kept very faint so they are never mistaken for the real scramble.
+- Same rules as the aurora: visible only through the page background and the glass navbar/sidebars (`--glass-blur` is a light 5px so characters stay recognisable), paused while the tab is hidden, a still frame under `prefers-reduced-motion`.
 
 ### Light theme overrides
 
@@ -383,7 +391,7 @@ Uses Tailwind defaults:
 
 ### Theme cycle
 
-Dark → Light → Borealis → Nebula → Ember → Dark (via `ThemeToggle` component)
+Dark → Light → Borealis → Nebula → Ember → ASCII → Dark (via `ThemeToggle` component)
 
 ### Adding a new theme
 
