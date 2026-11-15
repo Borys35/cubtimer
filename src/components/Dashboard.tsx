@@ -16,7 +16,7 @@ import type { ParseResult, ParsedSession, PuzzleType } from "@/lib/types";
 import { useSession } from "@/components/SessionProvider";
 import { convertTimerSessionsToParseResult } from "@/lib/import-export";
 import { fmtTime, type BucketMode, type RangeKey } from "@/lib/stats";
-import { bandFromMs, levelWeights, pctPerWeek } from "@/lib/stats";
+import { bandFromMs, levelWeights, pctPerWeek, SUB_X_MIN_SOLVES, SUB_X_WINDOW } from "@/lib/stats";
 import {
   computeDashboardModel,
   effectiveTypeOf,
@@ -44,12 +44,6 @@ const PUZZLE_TYPES: PuzzleType[] = [
   "Clock",
   "Unknown",
 ];
-
-const AXIS_PANEL: Record<string, string> = {
-  Improvement: "panel-red",
-  Consistency: "panel-blue",
-  Frequency: "panel-yellow",
-};
 
 function cvColor(cv: number | undefined, palette: ChartPalette): string {
   if (cv == null) return palette.raw;
@@ -351,22 +345,32 @@ export default function Dashboard() {
       </section>
 
       {/* Quick stats */}
-      <section className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-        {[
-          ["Solves in range", String(d.clean.length)],
-          ["DNFs", String(d.dnfInRange)],
-          ["Abandoned", String(d.junkCount)],
-          ["Current level", a.currentLevelMs != null ? fmtTime(a.currentLevelMs) : "-"],
-          ["Best single", d.bestSingleMs != null ? fmtTime(d.bestSingleMs) : "-"],
-          ["Active days", `${a.freq.activeDays}/14 @ ${a.freq.solvesPerActiveDay.toFixed(0)}/d`],
-        ].map(([k, v], i) => (
+      <section className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {(
+          [
+            ["Solves in range", String(d.clean.length)],
+            ["DNFs", String(d.dnfInRange)],
+            ["Abandoned", String(d.junkCount)],
+            ["Current level", a.currentLevelMs != null ? fmtTime(a.currentLevelMs) : "-"],
+            ["Best single", d.bestSingleMs != null ? fmtTime(d.bestSingleMs) : "-"],
+            ["Active days", `${a.freq.activeDays}/14 @ ${a.freq.solvesPerActiveDay.toFixed(0)}/d`],
+            [
+              "Sub-X",
+              d.subX != null ? `sub-${d.subX}` : "-",
+              `Trimmed mean of your last ${SUB_X_WINDOW} solves (fastest and slowest 5% dropped), rounded up to the next whole second. Needs ${SUB_X_MIN_SOLVES}+ solves.`,
+            ],
+            ["Best ao5 (all time)", d.bestAo5Ms != null ? fmtTime(d.bestAo5Ms) : "-"],
+            ["Best ao12 (all time)", d.bestAo12Ms != null ? fmtTime(d.bestAo12Ms) : "-"],
+          ] as [string, string, string?][]
+        ).map(([k, v, hint], i) => (
           <div
             key={k}
+            title={hint}
             className="stat-chip p-2.5 pl-3.5"
-            style={{ "--chip": `var(--chip${i + 1})`, "--chip-ink": `var(--ink${i + 1})` } as React.CSSProperties}
+            style={{ "--chip": `var(--chip${i + 1})` } as React.CSSProperties}
           >
             <div className="chip-label text-[10px] uppercase tracking-wide text-[var(--text-faint)]">{k}</div>
-            <div className="mt-0.5 font-mono text-base text-[var(--text)]" style={{color: i == 5 ? "var(--bg)" : ""}}>{v}</div>
+            <div className="mt-0.5 font-mono text-base text-[var(--text)]">{v}</div>
           </div>
         ))}
       </section>
@@ -493,11 +497,10 @@ export default function Dashboard() {
                 : f.area === "Consistency" ? "axis-consistency"
                   : f.area === "Frequency" ? "axis-frequency"
                     : "";
-            const panelClass = isWeak && AXIS_PANEL[f.area] ? `panel-solid ${AXIS_PANEL[f.area]}` : "";
             return (
               <div
                 key={f.area}
-                className={`card p-3.5 ${axisClass} ${panelClass} ${isWeak ? "prescription-card" : ""}`}
+                className={`card p-3.5 ${axisClass} ${isWeak ? "prescription-card" : ""}`}
               >
                 <div className="mb-1 flex flex-wrap items-center gap-2">
                   <span
@@ -515,7 +518,7 @@ export default function Dashboard() {
                     </span>
                   )}
                 </div>
-                <p className={`text-xs leading-relaxed ${isWeak ? "" : "text-[var(--text-dim)]"} panel-muted`}>
+                <p className={`text-xs leading-relaxed ${isWeak ? "" : "text-[var(--text-dim)]"}`}>
                   {f.text}
                 </p>
                 {f.prescription && (

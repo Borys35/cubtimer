@@ -4,13 +4,13 @@ Reference for every visual decision in the CubTimer UI. Change a token here, the
 
 ## Design philosophy
 
-Warm precision. The UI should feel like a well-built instrument — not a generic analytics dashboard. Amber accent over cold blue, monospace numbers for the scoreboard, sharp corners (0.5rem), generous whitespace. The cube's own colors appear in charts and the sticker theme, not as the primary UI accent.
+Warm precision. The UI should feel like a well-built instrument — not a generic analytics dashboard. Amber accent over cold blue, monospace numbers for the scoreboard, sharp corners (0.5rem), generous whitespace. The cube's own colors appear in charts, not as the primary UI accent.
 
 ---
 
 ## Color system
 
-All colors are CSS custom properties defined in `src/app/globals.css`. There are three theme scopes: `[data-theme="dark"]`, `[data-theme="light"]`, and `[data-theme="sticker"]`. Changing a hex value here changes it everywhere that token is used.
+All colors are CSS custom properties defined in `src/app/globals.css`. There are five theme scopes: `[data-theme="dark"]`, `[data-theme="light"]`, and the aurora themes `[data-theme="borealis"]`, `[data-theme="nebula"]`, `[data-theme="ember"]`. Changing a hex value here changes it everywhere that token is used.
 
 ### Core palette (dark theme shown)
 
@@ -37,7 +37,7 @@ All colors are CSS custom properties defined in `src/app/globals.css`. There are
 
 ### Cube sticker colors
 
-Used in chart series, the sticker theme, and the 3x3 hero grid. These represent the actual physical cube.
+Used in chart series and the 3x3 hero grid. These represent the actual physical cube.
 
 | Token           | Hex       | Face   |
 | --------------- | --------- | ------ |
@@ -50,16 +50,19 @@ Used in chart series, the sticker theme, and the 3x3 hero grid. These represent 
 
 ### Stat chip colors
 
-Each stat chip in the quick-stats row gets a color via `--chip1` through `--chip6` with matching `--ink1` through `--ink6` for text on colored backgrounds.
+Each stat chip in the quick-stats grid gets its accent-bar color via `--chip1` through `--chip9`.
 
-| Token pair           | Dark value            | Purpose                         |
-| -------------------- | --------------------- | ------------------------------- |
-| `--chip1` / `--ink1` | `#E5A126` / `#0B0E11` | Solves in range (amber on dark) |
-| `--chip2` / `--ink2` | `#38bdf8` / `#0B0E11` | DNFs (sky blue on dark)         |
-| `--chip3` / `--ink3` | `#2DA44E` / `#fff`    | Abandoned (green on white)      |
-| `--chip4` / `--ink4` | `#CF4B4B` / `#fff`    | Current level (red on white)    |
-| `--chip5` / `--ink5` | `#818cf8` / `#fff`    | Best single (indigo on white)   |
-| `--chip6` / `--ink6` | `#E8E6E1` / `#0B0E11` | Active days (white on dark)     |
+| Token     | Dark value | Chip                 |
+| --------- | ---------- | -------------------- |
+| `--chip1` | `#E5A126`  | Solves in range      |
+| `--chip2` | `#38bdf8`  | DNFs                 |
+| `--chip3` | `#2DA44E`  | Abandoned            |
+| `--chip4` | `#CF4B4B`  | Current level        |
+| `--chip5` | `#818cf8`  | Best single          |
+| `--chip6` | `#E8E6E1`  | Active days          |
+| `--chip7` | `#2DD4BF`  | Sub-X                |
+| `--chip8` | `#38bdf8`  | Best ao5 (all time)  |
+| `--chip9` | `#818cf8`  | Best ao12 (all time) |
 
 ### Chart series colors
 
@@ -96,9 +99,13 @@ The light theme redefines the same tokens with lighter values. Key differences:
 - `--amber: #B87A10` (darker for contrast on light backgrounds)
 - `--text: #1A1A1A`
 
-### Sticker theme
+### Aurora themes
 
-The sticker theme uses deeper, saturated versions of the cube colors as panel backgrounds (`--panel-red`, `--panel-blue`, etc.) and adds a multi-color radial gradient to `--bg-image` for atmosphere. Stat chips become fully colored (background = chip color, text = chip ink).
+Three dark themes — `borealis` (green / teal / violet), `nebula` (purple / pink / blue) and `ember` (orange / rose / amber) — drawn over an animated aurora. Each block in `globals.css` overrides the surfaces, text, accent (`--amber`) and chart tokens; everything else inherits the dark values from `:root`.
+
+- **Aurora**: `AuroraBackground.tsx` renders one full-viewport `<canvas class="aurora-canvas">` (`position: fixed`, `z-index: -1`) with a WebGL fragment shader — no library. It draws curtains of thin rays with a soft glowing lower rim over a starry sky, spread over the whole viewport height, at device-pixel resolution (up to 2x, capped at 4 MP) and 30 fps, drifting slowly (`TIME_SCALE`); it pauses while the tab is hidden and shows a single still frame under `prefers-reduced-motion`. Its colors come from `AURORA_PALETTES` in `src/lib/theme.ts`; `bg` there must equal the theme's `--bg`.
+- **Fallback**: `--bg-image` holds static radial gradients in the same colors, shown before the canvas mounts and when WebGL is unavailable.
+- **Glass**: the aurora is visible only through the page background, the navbar and the session sidebars. Those use `.glass` (sidebars: `--glass-bg` tint + `--glass-blur` backdrop blur) or `.glass-tint` (navbar: tint only). Both fall back to solid `--surface` in dark and light. The navbar skips the blur because `backdrop-filter` would make it the containing block for its `position: fixed` modals. Cards, chips and modals stay solid.
 
 ---
 
@@ -154,12 +161,12 @@ Used everywhere: scoreboard hero, stat chips, prescription cards, chart wrapper,
 
 ### Stat chip (`.stat-chip`)
 
-Small data cards in the quick-stats grid. Has a 4px left accent bar via `::before` pseudo-element. Color set via inline style `--chip` and `--chip-ink`.
+Small data cards in the quick-stats grid. Has a 4px left accent bar via `::before` pseudo-element. Color set via inline style `--chip`. An optional `title` explains the value (the Sub-X chip states its formula).
 
 ```jsx
 <div
   className="stat-chip p-2.5 pl-3.5"
-  style={{ "--chip": "var(--chip1)", "--chip-ink": "var(--ink1)" }}
+  style={{ "--chip": "var(--chip1)" }}
 >
   <div className="chip-label text-[10px] uppercase tracking-wide text-[var(--text-faint)]">
     Label
@@ -167,8 +174,6 @@ Small data cards in the quick-stats grid. Has a 4px left accent bar via `::befor
   <div className="mt-0.5 font-mono text-base text-[var(--text)]">Value</div>
 </div>
 ```
-
-In sticker theme, chips become fully colored (background = `--chip`, text = `--chip-ink`).
 
 ### Tier pill (`.tier-pill`)
 
@@ -274,21 +279,21 @@ Border/fill transition 0.15s, disabled under reduced motion. Not rendered in typ
 
 ### Session sidebar
 
-Desktop: fixed `w-64` panel on the left, `bg-[var(--surface)]`, `border-r border-[var(--border)]`.
-Mobile: slide-in overlay from left (`fixed inset-y-0 left-0`), toggled by the sessions button.
+Desktop: fixed `w-64` panel on the left, `.glass`, `border-r border-[var(--border)]`.
+Mobile: slide-in overlay from left (`fixed inset-y-0 left-0`, `.glass`), toggled by the sessions button. Creating a session from the puzzle picker closes it.
 
 Structure (top to bottom):
 
 1. **Dropdown button**: shows active session name · puzzle type · solve count
 2. **Dropdown menu**: all sessions sorted newest-first, each showing name + puzzle + count
 3. **Stats bar**: 2-column × 5-row grid — Best, Mean, Median, Std Dev, rCV (MAD), IQR, Best Ao5, Best Ao12, Ao5, Ao12. Best/Mean/Median and the Ao rows are times; Std Dev is seconds; rCV (MAD) and IQR are percentages. rCV/IQR render only with ≥3 clean solves.
-4. **Solve list**: all solves (scrollable), each with time, +2/DNF/delete buttons
+4. **Solve list**: all solves (scrollable), each with time, +2/DNF/delete buttons. Time, Ao5 and Ao12 cells that were a personal best when set stay colored (green / blue / purple): the current best is bold, ex-bests normal weight (`pbHistory` in `src/lib/stats.ts`).
 
 Auto-collapse: sidebar width → 0 during armed/running phases and in zen mode (300ms transition).
 
 ### Navbar
 
-Fixed top bar: `bg-[var(--surface)] border-b border-[var(--border)] shrink-0`.
+Fixed top bar: `glass-tint border-b border-[var(--border)] shrink-0`.
 Left: "CubTimer" brand link (class `logo-hover`). Right, `md` and up: Timer/Stats/Settings links + ThemeToggle + AccountMenu.
 
 Below `md`: logo | Install button | AccountMenu | ☰ **Nav menu** button (`h-8 w-8`, icon turns into ✕ while open). The Nav menu is a full-width dropdown under the navbar (`absolute top-full`, `--surface`, bottom border, `shadow-2xl`, `z-50`) listing Timer/Stats/Settings (`py-2.5` rows, `--surface-3` hover) and, under a divider, the ThemeToggle. It closes on link tap, outside tap and Escape. Its state lives in `Navbar.tsx`, not in `MenuContext` (that is the session sidebar).
@@ -346,7 +351,7 @@ Uses Tailwind defaults:
 | ------ | ------- | --------------------------------------------------------------- |
 | (none) | < 640px | Mobile — single column, stacked layout                          |
 | `sm:`  | 640px+  | Small desktop — slightly larger tiles/padding                   |
-| `lg:`  | 1024px+ | Large desktop — 2-column prescription grid, 6-column stat chips |
+| `lg:`  | 1024px+ | Large desktop — 2-column prescription grid, 3-column stat chips   |
 
 ### Key layout classes
 
@@ -354,7 +359,7 @@ Uses Tailwind defaults:
 | ------------------ | ---------------- | -------------------------------- |
 | Score hero         | Column (stacked) | Row (gauge left, bars right)     |
 | Prescription cards | Single column    | 2-column grid (`lg:grid-cols-2`) |
-| Quick stats        | 2-column grid    | 6-column grid (`lg:grid-cols-6`) |
+| Quick stats        | 2-column grid    | 3-column grid (`sm:grid-cols-3`) |
 | Filter bar         | Wrapping flex    | Single row                       |
 
 ### Spacing
@@ -372,26 +377,27 @@ Uses Tailwind defaults:
 
 1. Theme is stored in `localStorage` under key `cta-theme`
 2. Applied as `data-theme` attribute on `<html>`
-3. CSS variables in `globals.css` are scoped to `[data-theme="dark"]`, `[data-theme="light"]`, `[data-theme="sticker"]`
+3. CSS variables in `globals.css` are scoped to one `[data-theme="…"]` block per theme
 4. A no-flash script in `layout.tsx` reads localStorage before paint to prevent flicker
 5. System preference (`prefers-color-scheme`) is used as default on first visit
 
 ### Theme cycle
 
-Dark → Light → Sticker → Dark (via `ThemeToggle` component)
+Dark → Light → Borealis → Nebula → Ember → Dark (via `ThemeToggle` component)
 
 ### Adding a new theme
 
 1. Add `"newtheme"` to the `Theme` type in `src/lib/theme.ts`
 2. Add it to the `THEMES` array
 3. Add a `[data-theme="newtheme"] { ... }` block in `globals.css` with all token overrides
-4. The toggle and persistence automatically pick it up
+4. Add its label to `THEME_LABELS` and its icon in `ThemeToggle.tsx`; persistence picks it up automatically
+5. For an aurora theme, also add it to `AuroraTheme` and `AURORA_PALETTES`, and define `--glass-bg`, `--glass-blur` and a `--bg-image` fallback in its block
 
 ### Chart palette
 
 Charts read their colors at runtime via `readChartPalette()` in `src/lib/theme.ts`. It reads `--chart-*` and `--series-*` CSS variables from the computed style. This means chart colors automatically follow the active theme.
 
-If you add new chart series, add corresponding `--series-*` tokens in all three theme blocks and extend the `ChartPalette` interface.
+If you add new chart series, add corresponding `--series-*` tokens in every theme block and extend the `ChartPalette` interface.
 
 ---
 
@@ -432,7 +438,7 @@ The gauge ring transition is set via inline `style` attribute — to disable it 
 
 ### Change the primary accent color
 
-1. Update `--amber` and `--amber-dim` in all three theme blocks in `globals.css`
+1. Update `--amber` and `--amber-dim` in every theme block in `globals.css`
 2. Update `--chip1` if you want the first stat chip to match
 3. Update `--series-trend` if you want the trend line to match
 4. The `.axis-frequency` class also uses `--amber`
@@ -447,7 +453,7 @@ Edit the `GaugeRing` function in `src/components/ScoreboardHero.tsx`. Key values
 
 ### Add a new stat chip
 
-1. Add a new `--chipN` / `--inkN` pair in all three theme blocks
+1. Add a new `--chipN` token in the dark and light blocks (aurora themes inherit dark's)
 2. Add the chip to the array in `Dashboard.tsx` in the quick-stats section
 3. Reference it with `style={{ "--chip": "var(--chipN)" }}`
 

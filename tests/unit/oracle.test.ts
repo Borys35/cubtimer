@@ -30,7 +30,13 @@ describe("theme palette completeness", () => {
     "--series-proj",
   ];
 
-  for (const theme of ['[data-theme="dark"]', '[data-theme="light"]', '[data-theme="sticker"]']) {
+  for (const theme of [
+    '[data-theme="dark"]',
+    '[data-theme="light"]',
+    '[data-theme="borealis"]',
+    '[data-theme="nebula"]',
+    '[data-theme="ember"]',
+  ]) {
     it(`${theme} defines every chart variable`, () => {
       const start = css.indexOf(theme);
       expect(start).toBeGreaterThanOrEqual(0);

@@ -102,7 +102,7 @@ describe("SettingsPage", () => {
     expect(screen.getByText("Appearance")).toBeDefined();
     expect(screen.getAllByText(/dark/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/light/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/sticker/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/aurora/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders Clear all sessions button in Data section", () => {

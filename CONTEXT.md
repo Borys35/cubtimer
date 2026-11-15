@@ -28,6 +28,9 @@
 - **Ao5 / Ao12**: WCA trimmed average — drop best and worst, mean the rest. Multiple DNFs in window = DNF average.
 - **rCV (MAD)**: Robust coefficient of variation — `1.4826 × median(|xᵢ − median|) / median`. Unitless ratio displayed as percentage; lower = more consistent. One large outlier can't wreck it, so it replaces plain std-dev CV as the consistency metric. Computed for ≥3 clean times; backs `consistencyScore` and the chart's `sessionCv`.
 - **IQR ratio**: `(Q3 − Q1) / median` (interquartile range over the median), displayed as percentage; requires ≥3 clean times.
+- **Best Ao5 / Ao12 (all time)**: lowest Ao5 / Ao12 over every solve of the puzzle type, whatever range is selected. An average never spans two sessions.
+- **Sub-X**: the whole-second level the user currently averages under, e.g. sub-15. Take the last 100 clean solves of the puzzle type (abandoned solves excluded), drop the fastest and slowest 5%, mean the rest, round up to the next whole second: `X = ⌊trimmed mean in s⌋ + 1`. A 14.50 average is sub-15; an exact 15.00 is sub-16. Needs at least 12 solves.
+- **Ex-best**: a single, Ao5 or Ao12 that was a personal best when it was set and has since been beaten. Stays highlighted in the solve table next to the current best.
 - **Std Dev**: Population standard deviation of solve times (penalties applied). Displayed in seconds.
 
 ## UI components
