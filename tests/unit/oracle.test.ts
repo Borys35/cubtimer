@@ -36,6 +36,7 @@ describe("theme palette completeness", () => {
     '[data-theme="borealis"]',
     '[data-theme="nebula"]',
     '[data-theme="ember"]',
+    '[data-theme="ascii"]',
   ]) {
     it(`${theme} defines every chart variable`, () => {
       const start = css.indexOf(theme);

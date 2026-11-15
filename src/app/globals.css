@@ -206,6 +206,37 @@
   --series-proj: #F87171;
 }
 
+/* ASCII theme: dark palette over a canvas of turning ASCII cubes and typed
+   algorithms (AsciiBackground.tsx). Light blur only, so the characters stay
+   recognisable through the sidebar. */
+[data-theme="ascii"] {
+  color-scheme: dark;
+  --bg: #06080A;
+  --surface: #0D1114;
+  --surface-2: #131A1E;
+  --surface-3: #1B252B;
+  --border: #26333B;
+  --text: #DDE6E1;
+  --text-dim: #7F8E8A;
+  --text-faint: #4D5B58;
+  --track: #162026;
+
+  --glass-bg: color-mix(in srgb, #0D1114 62%, transparent);
+  --glass-blur: blur(5px);
+
+  --chart-bg: #0D1114;
+  --chart-grid: #162026;
+  --chart-tick: #7F8E8A;
+  --chart-volume: #1B252B;
+  --chart-tooltip-bg: #131A1E;
+  --series-raw: #9CA3AF;
+  --series-ao5: #38bdf8;
+  --series-ao12: #818cf8;
+  --series-ao100: #34d399;
+  --series-trend: #E5A126;
+  --series-proj: #CF4B4B;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--bg);
@@ -351,7 +382,8 @@ body {
   backdrop-filter: var(--glass-blur, none);
 }
 
-.aurora-canvas {
+.aurora-canvas,
+.ascii-canvas {
   position: fixed;
   inset: 0;
   width: 100%;

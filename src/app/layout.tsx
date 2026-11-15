@@ -10,6 +10,7 @@ import { Navbar } from "@/components/Navbar";
 import { TimerPhaseProvider } from "@/components/TimerPhaseContext";
 import { UpdateToast } from "@/components/UpdateToast";
 import { AuroraBackground } from "@/components/AuroraBackground";
+import { AsciiBackground } from "@/components/AsciiBackground";
 
 export const metadata: Metadata = {
   title: "CubTimer – Speedcubing Timer & cstimer Progress Analyzer",
@@ -55,6 +56,7 @@ export default function RootLayout({
         <MenuProvider>
           <ThemeProvider>
             <AuroraBackground />
+            <AsciiBackground />
             <AuthProvider>
               <SessionProvider>
                 <TimerPhaseProvider>

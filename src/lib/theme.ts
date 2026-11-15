@@ -1,7 +1,7 @@
 export type AuroraTheme = "borealis" | "nebula" | "ember";
-export type Theme = "dark" | "light" | AuroraTheme;
+export type Theme = "dark" | "light" | AuroraTheme | "ascii";
 
-export const THEMES: Theme[] = ["dark", "light", "borealis", "nebula", "ember"];
+export const THEMES: Theme[] = ["dark", "light", "borealis", "nebula", "ember", "ascii"];
 
 export const THEME_LABELS: Record<Theme, string> = {
   dark: "Dark",
@@ -9,6 +9,7 @@ export const THEME_LABELS: Record<Theme, string> = {
   borealis: "Borealis",
   nebula: "Nebula",
   ember: "Ember",
+  ascii: "ASCII",
 };
 
 /** Colors the aurora shader paints with. `bg` must match the theme's `--bg`. */
