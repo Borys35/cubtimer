@@ -1,6 +1,8 @@
 import type { ParseResult, ParsedSession, PuzzleType, Solve } from "./types";
 import {
   analyze,
+  bestRollingAverage,
+  subXLevel,
   filterByRange,
   separateJunk,
   type BucketMode,
@@ -36,6 +38,11 @@ export interface DashboardModel {
   report: CoachReport;
   projSentence: string | null;
   bestSingleMs: number | null;
+  /** Best Ao5 / Ao12 over every solve of the selected type, ignoring the range filter. */
+  bestAo5Ms: number | null;
+  bestAo12Ms: number | null;
+  /** Whole-second X of the user's current "sub-X" level; null with too few solves. */
+  subX: number | null;
 }
 
 export function effectiveTypeOf(
@@ -105,6 +112,15 @@ export function computeDashboardModel(
   });
   const projSentence = projectionSentence(analysis, opts.horizonWeeks);
 
+  // All-time figures: independent of the range filter. Averages never span sessions.
+  const bestAoAllTime = (n: number) => {
+    const bests = active
+      .map((s) => bestRollingAverage(s.solves, n))
+      .filter((v): v is number => v !== null);
+    return bests.length ? Math.min(...bests) : null;
+  };
+  const allTimeClean = separateJunk(merged).kept.filter((s) => !s.dnf);
+
   return {
     typeOptions,
     mergedCount: merged.length,
@@ -116,5 +132,8 @@ export function computeDashboardModel(
     report,
     projSentence,
     bestSingleMs: clean.length ? Math.min(...clean.map((s) => s.timeMs)) : null,
+    bestAo5Ms: bestAoAllTime(5),
+    bestAo12Ms: bestAoAllTime(12),
+    subX: subXLevel(allTimeClean.map((s) => s.timeMs)),
   };
 }

@@ -5,7 +5,7 @@ import type { PuzzleType, TimerSolve } from "@/lib/types";
 import { useSession } from "@/components/SessionProvider";
 import { useMenu } from "@/components/MenuContext";
 import { formatTimerTime } from "@/lib/timer-utils";
-import { rollingAverage, rollingMean, median, madCv, iqrCv, computePersonalBests, type PersonalBests } from "@/lib/stats";
+import { rollingAverage, rollingMean, median, madCv, iqrCv, computePersonalBests, pbHistory } from "@/lib/stats";
 import { Toast } from "@/components/Toast";
 
 const PUZZLE_OPTIONS: PuzzleType[] = [
@@ -162,21 +162,20 @@ function SolveList({
     return map;
   }, [solves]);
 
-  const bestSingleMs = useMemo(() => {
-    const clean = solves.filter((s) => !s.dnf);
-    if (clean.length === 0) return null;
-    return Math.min(...clean.map((s) => s.timeMs + (s.penalty > 0 ? 2000 : 0)));
-  }, [solves]);
-
-  const bestAo5Ms = useMemo(() => {
-    const vals = [...ao5Map.values()].filter((v): v is number => v !== null);
-    return vals.length > 0 ? Math.min(...vals) : null;
-  }, [ao5Map]);
-
-  const bestAo12Ms = useMemo(() => {
-    const vals = [...ao12Map.values()].filter((v): v is number => v !== null);
-    return vals.length > 0 ? Math.min(...vals) : null;
-  }, [ao12Map]);
+  // Every value that was a PB when it was set stays highlighted: the
+  // current best is bold, ex-bests keep the color at normal weight.
+  const records = useMemo(() => {
+    const singles = solves.map((s) => (s.dnf ? null : s.timeMs + (s.penalty > 0 ? 2000 : 0)));
+    const ao5s = solves.map((_, i) => ao5Map.get(i) ?? null);
+    const ao12s = solves.map((_, i) => ao12Map.get(i) ?? null);
+    const mark = (values: (number | null)[]) => {
+      const everBest = pbHistory(values);
+      const finite = values.filter((v): v is number => v !== null);
+      const best = finite.length > 0 ? Math.min(...finite) : null;
+      return values.map((v, i) => (!everBest[i] ? "" : v === best ? "current" : "ex"));
+    };
+    return { single: mark(singles), ao5: mark(ao5s), ao12: mark(ao12s) };
+  }, [solves, ao5Map, ao12Map]);
 
   if (solves.length === 0) return null;
   const reversed = [...solves].reverse();
@@ -195,10 +194,11 @@ function SolveList({
           const origIdx = solves.length - 1 - i;
           const ao5 = ao5Map.get(origIdx) ?? null;
           const ao12 = ao12Map.get(origIdx) ?? null;
-          const solveEffectiveMs = solve.timeMs + (solve.penalty > 0 ? 2000 : 0);
-          const isBestSingle = bestSingleMs !== null && !solve.dnf && solveEffectiveMs === bestSingleMs;
-          const isBestAo5 = bestAo5Ms !== null && ao5 !== null && ao5 === bestAo5Ms;
-          const isBestAo12 = bestAo12Ms !== null && ao12 !== null && ao12 === bestAo12Ms;
+          const pbClass = (kind: string, color: string, plain: string) =>
+            kind === "current" ? `${color} font-bold` : kind === "ex" ? color : plain;
+          const singleClass = pbClass(records.single[origIdx], "text-green-400", "opacity-60");
+          const ao5Class = pbClass(records.ao5[origIdx], "text-blue-400", "opacity-40");
+          const ao12Class = pbClass(records.ao12[origIdx], "text-purple-400", "opacity-40");
           return (
             <tr
               key={solve.id}
@@ -206,7 +206,7 @@ function SolveList({
               onClick={() => onSelectSolve(solve)}
             >
               <td className="py-0.5 opacity-30 text-xs">#{solves.length - i}</td>
-              <td className={`py-0.5 text-right font-mono whitespace-nowrap ${isBestSingle ? "text-green-400 font-bold" : "opacity-60"}`}>
+              <td className={`py-0.5 text-right font-mono whitespace-nowrap ${singleClass}`}>
                 {solve.dnf ? (
                   "DNF"
                 ) : solve.penalty > 0 ? (
@@ -218,10 +218,10 @@ function SolveList({
                   formatTimerTime(solve.timeMs)
                 )}
               </td>
-              <td className={`py-0.5 text-right font-mono text-xs ${isBestAo5 ? "text-blue-400 font-bold" : "opacity-40"}`}>
+              <td className={`py-0.5 text-right font-mono text-xs ${ao5Class}`}>
                 {ao5 !== null ? formatTimerTime(ao5) : ""}
               </td>
-              <td className={`py-0.5 text-right font-mono text-xs ${isBestAo12 ? "text-purple-400 font-bold" : "opacity-40"}`}>
+              <td className={`py-0.5 text-right font-mono text-xs ${ao12Class}`}>
                 {ao12 !== null ? formatTimerTime(ao12) : ""}
               </td>
             </tr>
@@ -441,7 +441,7 @@ export function SessionSidebar() {
   };
 
   const sidebar = (
-    <div className="w-64 h-full bg-[var(--surface)] border-r border-[var(--border)] flex flex-col">
+    <div className="w-64 h-full border-r border-[var(--border)] flex flex-col">
       {/* Dropdown button */}
       <div className="p-3 border-b border-[var(--border)]">
         <div className="flex items-center justify-between mb-2">
@@ -602,7 +602,11 @@ export function SessionSidebar() {
           make it the containing block for these fixed overlays and clip them. */}
       {showPicker && (
         <NewSessionPicker
-          onSelect={(puzzle) => createSession(puzzle)}
+          onSelect={(puzzle) => {
+            createSession(puzzle);
+            setDropdownOpen(false);
+            setMobileOpen(false);
+          }}
           onClose={() => setShowPicker(false)}
         />
       )}
@@ -634,11 +638,11 @@ export function SessionSidebar() {
       )}
 
       {/* Desktop sidebar */}
-      <div className="hidden md:block h-full">{sidebar}</div>
+      <div className="glass hidden md:block h-full">{sidebar}</div>
 
       {/* Mobile slide-in */}
       <div
-        className={`safe-area-sidebar fixed inset-y-0 left-0 z-30 transition-transform duration-200 md:hidden ${
+        className={`safe-area-sidebar glass fixed inset-y-0 left-0 z-30 transition-transform duration-200 md:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

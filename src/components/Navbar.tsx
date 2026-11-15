@@ -37,7 +37,7 @@ export function Navbar() {
   return (
     <nav
       ref={navRef}
-      className="safe-area-nav relative flex items-center justify-between px-4 py-2 border-b border-[var(--border)] text-base bg-[var(--surface)] shrink-0"
+      className="safe-area-nav relative flex items-center justify-between px-4 py-2 border-b border-[var(--border)] text-base glass-tint shrink-0"
     >
       <div className="flex items-center gap-3">
         <Link href="/" className="logo-hover relative inline-block">

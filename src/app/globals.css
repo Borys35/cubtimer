@@ -31,18 +31,15 @@
   --cube-blue: #0057c8;
   --cube-white: #f8fafc;
 
-  --panel-red: var(--cube-red);
-  --panel-orange: var(--cube-orange);
-  --panel-yellow: var(--cube-yellow);
-  --panel-green: var(--cube-green);
-  --panel-blue: var(--cube-blue);
-
-  --chip1: #E5A126; --ink1: #0B0E11;
-  --chip2: #38bdf8; --ink2: #0B0E11;
-  --chip3: #2DA44E; --ink3: #fff;
-  --chip4: #CF4B4B; --ink4: #fff;
-  --chip5: #818cf8; --ink5: #fff;
-  --chip6: #E8E6E1; --ink6: #0B0E11;
+  --chip1: #E5A126;
+  --chip2: #38bdf8;
+  --chip3: #2DA44E;
+  --chip4: #CF4B4B;
+  --chip5: #818cf8;
+  --chip6: #E8E6E1;
+  --chip7: #2DD4BF;
+  --chip8: #38bdf8;
+  --chip9: #818cf8;
 
   --chart-bg: #141920;
   --chart-grid: #1E2530;
@@ -74,12 +71,15 @@
   --green: #1A7F37;
   --red: #CF222E;
 
-  --chip1: #B87A10; --ink1: #fff;
-  --chip2: #0284c7; --ink2: #fff;
-  --chip3: #1A7F37; --ink3: #fff;
-  --chip4: #CF222E; --ink4: #fff;
-  --chip5: #6366f1; --ink5: #fff;
-  --chip6: #1A1A1A; --ink6: #fff;
+  --chip1: #B87A10;
+  --chip2: #0284c7;
+  --chip3: #1A7F37;
+  --chip4: #CF222E;
+  --chip5: #6366f1;
+  --chip6: #1A1A1A;
+  --chip7: #0D9488;
+  --chip8: #0284c7;
+  --chip9: #6366f1;
 
   --chart-bg: #FFFFFF;
   --chart-grid: #E5E2DC;
@@ -94,55 +94,116 @@
   --series-proj: #CF222E;
 }
 
-[data-theme="sticker"] {
+/* Aurora themes: dark palettes over an animated WebGL aurora
+   (AuroraBackground.tsx). --bg must match AURORA_PALETTES in src/lib/theme.ts.
+   --bg-image is the static fallback shown before the canvas mounts or when
+   WebGL is unavailable. Tokens not listed here inherit the dark values. */
+[data-theme="borealis"] {
   color-scheme: dark;
-  --bg: #0c0c10;
-  --bg-image: radial-gradient(
-      ellipse 60% 50% at 15% 20%,
-      rgba(234, 51, 35, 0.14),
-      transparent
-    ),
-    radial-gradient(ellipse 50% 40% at 85% 30%, rgba(0, 87, 200, 0.16), transparent),
-    radial-gradient(ellipse 55% 45% at 70% 85%, rgba(0, 166, 81, 0.13), transparent),
-    radial-gradient(ellipse 45% 40% at 30% 90%, rgba(255, 213, 0, 0.08), transparent);
-  --surface: #16161c;
-  --surface-2: #1d1d24;
-  --surface-3: #292932;
-  --border: #46464f;
-  --text: #f4f4f5;
-  --text-dim: #b1b1ba;
-  --text-faint: #81818a;
-  --track: rgba(255, 255, 255, 0.12);
+  --bg: #050B10;
+  --bg-image: radial-gradient(ellipse 70% 45% at 20% 30%, rgba(25, 230, 140, 0.16), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 45%, rgba(31, 200, 219, 0.14), transparent),
+    radial-gradient(ellipse 65% 40% at 55% 15%, rgba(123, 92, 255, 0.14), transparent);
+  --surface: #0C161D;
+  --surface-2: #122029;
+  --surface-3: #1A2C37;
+  --border: #25404C;
+  --text: #E6F1EE;
+  --text-dim: #8AA0A3;
+  --text-faint: #566B70;
+  --track: #16262F;
 
-  --amber: #ffd500;
-  --amber-dim: #b89a00;
-  --green: #00a651;
-  --red: #ea3323;
+  --amber: #45E0A8;
+  --amber-dim: #2FAE80;
 
-  --panel-red: #8e1a12;
-  --panel-orange: #a63e00;
-  --panel-yellow: #7a5c00;
-  --panel-green: #04572c;
-  --panel-blue: #04386f;
+  --glass-bg: color-mix(in srgb, #0C161D 52%, transparent);
+  --glass-blur: blur(22px) saturate(150%);
 
-  --chip1: #8e1a12; --ink1: #fff;
-  --chip2: #04386f; --ink2: #fff;
-  --chip3: #7a5c00; --ink3: #fff;
-  --chip4: #04572c; --ink4: #fff;
-  --chip5: #a63e00; --ink5: #fff;
-  --chip6: #e8e8ec; --ink6: #17171b;
+  --chip1: #45E0A8;
 
-  --chart-bg: #121218;
-  --chart-grid: #2c2c36;
-  --chart-tick: #b1b1ba;
-  --chart-volume: #3a3a46;
-  --chart-tooltip-bg: #121218;
-  --series-raw: #d4d4d8;
+  --chart-bg: #0C161D;
+  --chart-grid: #16262F;
+  --chart-tick: #8AA0A3;
+  --chart-volume: #1A2C37;
+  --chart-tooltip-bg: #122029;
+  --series-raw: #9CA3AF;
   --series-ao5: #38bdf8;
   --series-ao12: #818cf8;
   --series-ao100: #34d399;
-  --series-trend: #ffd500;
-  --series-proj: #f87171;
+  --series-trend: #45E0A8;
+  --series-proj: #F87171;
+}
+
+[data-theme="nebula"] {
+  color-scheme: dark;
+  --bg: #090714;
+  --bg-image: radial-gradient(ellipse 70% 45% at 20% 30%, rgba(168, 85, 247, 0.18), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 45%, rgba(236, 72, 153, 0.13), transparent),
+    radial-gradient(ellipse 65% 40% at 55% 15%, rgba(59, 130, 246, 0.15), transparent);
+  --surface: #120F22;
+  --surface-2: #1A1630;
+  --surface-3: #251F42;
+  --border: #372F5C;
+  --text: #ECE9F7;
+  --text-dim: #9A93B8;
+  --text-faint: #645D85;
+  --track: #1E1936;
+
+  --amber: #C4A1FF;
+  --amber-dim: #9B6EF0;
+
+  --glass-bg: color-mix(in srgb, #120F22 52%, transparent);
+  --glass-blur: blur(22px) saturate(150%);
+
+  --chip1: #C4A1FF;
+
+  --chart-bg: #120F22;
+  --chart-grid: #1E1936;
+  --chart-tick: #9A93B8;
+  --chart-volume: #251F42;
+  --chart-tooltip-bg: #1A1630;
+  --series-raw: #9CA3AF;
+  --series-ao5: #38bdf8;
+  --series-ao12: #818cf8;
+  --series-ao100: #34d399;
+  --series-trend: #C4A1FF;
+  --series-proj: #F87171;
+}
+
+[data-theme="ember"] {
+  color-scheme: dark;
+  --bg: #100806;
+  --bg-image: radial-gradient(ellipse 70% 45% at 20% 30%, rgba(255, 106, 61, 0.17), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 45%, rgba(255, 46, 126, 0.13), transparent),
+    radial-gradient(ellipse 65% 40% at 55% 15%, rgba(255, 176, 32, 0.12), transparent);
+  --surface: #1A100C;
+  --surface-2: #241713;
+  --surface-3: #33211A;
+  --border: #4A3026;
+  --text: #F5ECE6;
+  --text-dim: #B09A8F;
+  --text-faint: #78635A;
+  --track: #2A1A14;
+
+  --amber: #FFB347;
+  --amber-dim: #D98A1F;
+
+  --glass-bg: color-mix(in srgb, #1A100C 52%, transparent);
+  --glass-blur: blur(22px) saturate(150%);
+
+  --chip1: #FFB347;
+
+  --chart-bg: #1A100C;
+  --chart-grid: #2A1A14;
+  --chart-tick: #B09A8F;
+  --chart-volume: #33211A;
+  --chart-tooltip-bg: #241713;
+  --series-raw: #9CA3AF;
+  --series-ao5: #38bdf8;
+  --series-ao12: #818cf8;
+  --series-ao100: #34d399;
+  --series-trend: #FFB347;
+  --series-proj: #F87171;
 }
 
 body {
@@ -205,16 +266,6 @@ body {
     width: 4px;
     background: var(--chip, var(--amber));
   }
-  [data-theme="sticker"] .stat-chip {
-    background: var(--chip);
-    border-color: transparent;
-    color: var(--chip-ink, #fff);
-  }
-  [data-theme="sticker"] .stat-chip .chip-label {
-    color: var(--chip-ink, #fff);
-    opacity: 0.92;
-  }
-
   .tier-pill {
     display: inline-block;
     border-radius: 999px;
@@ -240,46 +291,6 @@ body {
   .axis-frequency {
     --axis: var(--amber);
     --axis-text: var(--amber);
-  }
-
-  [data-theme="sticker"] .panel-solid {
-    border-color: transparent;
-    border-width: 2px;
-  }
-  [data-theme="sticker"] .panel-red {
-    background: var(--panel-red);
-    color: #fff;
-  }
-  [data-theme="sticker"] .panel-blue {
-    background: var(--panel-blue);
-    color: #fff;
-  }
-  [data-theme="sticker"] .panel-green {
-    background: var(--panel-green);
-    color: #fff;
-  }
-  [data-theme="sticker"] .panel-orange {
-    background: var(--panel-orange);
-    color: #fff;
-  }
-  [data-theme="sticker"] .panel-yellow {
-    background: var(--panel-yellow);
-    color: #fff;
-  }
-  [data-theme="sticker"] .panel-yellow .panel-muted {
-    color: rgba(23, 23, 27, 0.85);
-  }
-  [data-theme="sticker"] .panel-white {
-    background: var(--cube-white);
-    color: #17171b;
-  }
-  [data-theme="sticker"] .panel-white .panel-muted {
-    color: rgba(23, 23, 27, 0.82);
-  }
-  [data-theme="sticker"] .panel-solid.axis-improvement,
-  [data-theme="sticker"] .panel-solid.axis-consistency,
-  [data-theme="sticker"] .panel-solid.axis-frequency {
-    --axis-text: #fff;
   }
 
   .prescription-card {
@@ -325,7 +336,28 @@ body {
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
-  background: var(--surface);
+}
+
+/* Glass: solid --surface in dark/light; translucent and frosted in the aurora
+   themes, which define --glass-bg / --glass-blur. backdrop-filter makes an
+   element the containing block for position:fixed descendants, so the navbar
+   (its modals are fixed children) uses .glass-tint, which skips the blur. */
+.glass-tint,
+.glass {
+  background: var(--glass-bg, var(--surface));
+}
+.glass {
+  -webkit-backdrop-filter: var(--glass-blur, none);
+  backdrop-filter: var(--glass-blur, none);
+}
+
+.aurora-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
 }
 .safe-area-toast {
   bottom: calc(1rem + env(safe-area-inset-bottom));

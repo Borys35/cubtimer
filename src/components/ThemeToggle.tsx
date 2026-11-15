@@ -1,10 +1,15 @@
 "use client";
 
-import type { Theme } from "@/lib/theme";
+import { THEME_LABELS as LABELS, type Theme } from "@/lib/theme";
 import { useTheme } from "@/components/ThemeProvider";
 
-const LABELS: Record<Theme, string> = { dark: "Dark", light: "Light", sticker: "Sticker" };
-const ICONS: Record<Theme, string> = { dark: "\u25CF", light: "\u25CB", sticker: "\u25A0" };
+const ICONS: Record<Theme, string> = {
+  dark: "\u25CF",
+  light: "\u25CB",
+  borealis: "\u2726",
+  nebula: "\u2726",
+  ember: "\u2726",
+};
 
 export default function ThemeToggle() {
   const { theme, cycleTheme } = useTheme();

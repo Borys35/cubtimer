@@ -15,6 +15,10 @@ import {
   weeklyBuckets,
   improvementScore,
   computePersonalBests,
+  bestRollingAverage,
+  subXLevel,
+  pbHistory,
+  SUB_X_MIN_SOLVES,
 } from "@/lib/stats";
 import type { Solve } from "@/lib/types";
 
@@ -234,5 +238,56 @@ describe("computePersonalBests", () => {
     expect(pbs.ao12).not.toBeNull();
     expect(pbs.ao50).not.toBeNull();
     expect(pbs.ao100).toBeNull(); // fewer than 100 solves
+  });
+});
+
+describe("bestRollingAverage", () => {
+  it("returns the lowest finite average and skips DNF averages", () => {
+    const times = [20, 18, 16, 14, 12, 30, 30].map((t) => solve({ timeMs: t * 1000 }));
+    // windows: [20,18,16,14,12] -> 16, [18,16,14,12,30] -> 16, [16,14,12,30,30] -> 20
+    expect(bestRollingAverage(times, 5)).toBe(16000);
+    const twoDnfs = [solve({}), solve({ dnf: true }), solve({ dnf: true }), solve({}), solve({})];
+    expect(bestRollingAverage(twoDnfs, 5)).toBeNull();
+  });
+
+  it("is null with fewer than n solves", () => {
+    expect(bestRollingAverage([solve({}), solve({})], 5)).toBeNull();
+  });
+});
+
+describe("subXLevel", () => {
+  it("is null below the minimum solve count", () => {
+    expect(subXLevel(Array(SUB_X_MIN_SOLVES - 1).fill(14500))).toBeNull();
+  });
+
+  it("rounds the average up to the next whole second", () => {
+    expect(subXLevel(Array(20).fill(14500))).toBe(15);
+    expect(subXLevel(Array(20).fill(9990))).toBe(10);
+  });
+
+  it("an exact whole-second average is not yet sub that second", () => {
+    expect(subXLevel(Array(20).fill(15000))).toBe(16);
+  });
+
+  it("ignores a lucky single and a blow-up", () => {
+    const times = [...Array(18).fill(14500), 6000, 60000];
+    expect(subXLevel(times)).toBe(15);
+  });
+
+  it("uses only the most recent 100 solves", () => {
+    const times = [...Array(300).fill(30000), ...Array(100).fill(11200)];
+    expect(subXLevel(times)).toBe(12);
+  });
+});
+
+describe("pbHistory", () => {
+  it("marks every value that was a best when set, not only the current best", () => {
+    expect(pbHistory([20, 25, 18, 19, null, 15, 15, 16])).toEqual([
+      true, false, true, false, false, true, true, false,
+    ]);
+  });
+
+  it("never marks nulls", () => {
+    expect(pbHistory([null, null])).toEqual([false, false]);
   });
 });

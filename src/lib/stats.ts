@@ -516,3 +516,46 @@ export function computePersonalBests(solves: Solve[]): PersonalBests {
     ao100: getBest(rollingAverage(solves, 100)),
   };
 }
+
+/** Best (lowest) finite rolling AoN in a solve list, or null when there is none. */
+export function bestRollingAverage(solves: Solve[], n: number): number | null {
+  let best: number | null = null;
+  for (const { ms } of rollingAverage(solves, n)) {
+    if (isFinite(ms) && (best === null || ms < best)) best = ms;
+  }
+  return best;
+}
+
+export const SUB_X_WINDOW = 100;
+export const SUB_X_MIN_SOLVES = 12;
+
+/**
+ * "Sub-X" level: the whole-second X the user currently averages under.
+ * Trimmed mean of the last SUB_X_WINDOW clean times (fastest and slowest 5%
+ * dropped, at least one each), rounded up to the next whole second; an
+ * exact 15.000 average is sub-16, not sub-15.
+ * `cleanTimesMs` is chronological, DNFs already removed.
+ */
+export function subXLevel(cleanTimesMs: number[]): number | null {
+  const recent = cleanTimesMs.slice(-SUB_X_WINDOW);
+  if (recent.length < SUB_X_MIN_SOLVES) return null;
+  const sorted = [...recent].sort((a, b) => a - b);
+  const trim = Math.max(1, Math.ceil(sorted.length * 0.05));
+  const kept = sorted.slice(trim, sorted.length - trim);
+  const mean = kept.reduce((a, b) => a + b, 0) / kept.length;
+  return Math.floor(mean / 1000) + 1;
+}
+
+/**
+ * Marks every value that was a personal best when it was set: lower than or
+ * equal to everything before it. Nulls (DNF / no average yet) are never
+ * records. The last `true` is the current best; earlier ones are ex-bests.
+ */
+export function pbHistory(values: (number | null)[]): boolean[] {
+  let best = Infinity;
+  return values.map((v) => {
+    if (v === null || v > best) return false;
+    best = v;
+    return true;
+  });
+}

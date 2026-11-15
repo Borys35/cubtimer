@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { SessionProvider } from "@/components/SessionProvider";
 import { SessionSidebar } from "@/components/SessionSidebar";
-import type { StorageAdapter, AppData, TimerSession } from "@/lib/types";
+import { MenuProvider, useMenu } from "@/components/MenuContext";
+import type { StorageAdapter, AppData, TimerSession, TimerSolve } from "@/lib/types";
 import { DEFAULT_SETTINGS } from "@/lib/types";
 
 function makeSession(overrides: Partial<TimerSession> = {}): TimerSession {
@@ -84,5 +85,53 @@ describe("SessionSidebar", () => {
     )!;
     fireEvent.click(pyraminxBtn);
     expect(screen.getAllByText(/Session_/i).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("closes the mobile sidebar as soon as a new session is created", () => {
+    function OpenState() {
+      const { mobileOpen, setMobileOpen } = useMenu();
+      return (
+        <button data-testid="menu-state" onClick={() => setMobileOpen(true)}>
+          {mobileOpen ? "open" : "closed"}
+        </button>
+      );
+    }
+    // Earlier tests leave their renders in the document, so query this one only.
+    const view = within(
+      renderWithProvider(
+        <MenuProvider>
+          <OpenState />
+          <SessionSidebar />
+        </MenuProvider>,
+        adapter,
+      ).container,
+    );
+    fireEvent.click(view.getByTestId("menu-state"));
+    expect(view.getByTestId("menu-state").textContent).toBe("open");
+    fireEvent.click(view.getAllByText("+")[0]);
+    fireEvent.click(view.getAllByText("Pyraminx")[0]);
+    expect(view.getByTestId("menu-state").textContent).toBe("closed");
+  });
+
+  it("keeps ex-best singles highlighted after a new best", () => {
+    const mk = (id: string, timeMs: number): TimerSolve => ({
+      id,
+      timeMs,
+      dnf: false,
+      penalty: 0,
+      scramble: "",
+      dateSec: 1725110400,
+    });
+    // 20.00 was the best, then 18.00 beat it; 25.00 was never a best.
+    const solves = [mk("a", 20000), mk("b", 25000), mk("c", 18000)];
+    adapter = makeAdapter(makeData([makeSession({ id: "s1", solves })], "s1"));
+    const view = within(renderWithProvider(<SessionSidebar />, adapter).container);
+    const cell = (text: string) =>
+      view.getAllByText(text).map((el) => el.closest("td")).find((td) => td !== null)!;
+    expect(cell("18.00").className).toContain("text-green-400");
+    expect(cell("18.00").className).toContain("font-bold");
+    expect(cell("20.00").className).toContain("text-green-400");
+    expect(cell("20.00").className).not.toContain("font-bold");
+    expect(cell("25.00").className).not.toContain("text-green-400");
   });
 });

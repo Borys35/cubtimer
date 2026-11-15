@@ -64,7 +64,7 @@ Upload a cstimer export (.txt) → get a progress chart, scoring breakdown, and 
 
 ### Themes
 
-Dark → Light → Sticker. Sticker is the toy-box mode: cube-sticker-colored panels, rainbow wash. Preference persisted in localStorage.
+Dark → Light → Borealis → Nebula → Ember. The last three are aurora themes: an animated aurora in the background, seen through a glassy navbar and session sidebar. Preference persisted in localStorage.
 
 ## How your data is processed
 
